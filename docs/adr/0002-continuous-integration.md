@@ -1,0 +1,29 @@
+# 0002. Continuous integration
+
+- Status: Accepted
+- Date: 2026-11-15
+
+## Context
+
+Every change must pass the quality gates in `CLAUDE.md` (formatting, lint, complexity limits, tests with coverage) before it reaches `main`. Migrations must have working rollbacks (`Database.md`), and the OpenAPI file is the authoritative API contract (`api.md`). Continuous delivery is out of scope for now: there is no deployment environment yet.
+
+## Decision
+
+A single GitHub Actions workflow, `.github/workflows/ci.yml`, runs on every pull request and on every push to `main`, with independent parallel jobs:
+
+1. **Backend**: `task backend:check` (the same entry point developers run locally) plus `govulncheck`. Go runs on the latest 1.25 patch release, so stdlib fixes are picked up without editing `go.mod`.
+2. **Frontend**: `task frontend:check` plus a production build.
+3. **Database migrations**: builds the `database/` runner image and, against a throwaway PostgreSQL service, runs `liquibase validate` and `liquibase update-testing-rollback` (apply, roll back, re-apply every changeset).
+4. **API contract**: Redocly lint of `docs/api/openapi.yaml`.
+5. **Images**: builds the backend, frontend and migrations images without pushing them.
+
+Tool and action versions are pinned. The workflow token is read-only (`contents: read`).
+
+SonarQube analysis stays local (`task sonar`): hosted SonarQube is forbidden, and GitHub-hosted runners cannot reach a developer's local server.
+
+## Consequences
+
+- Local and CI checks share the Taskfile, so they cannot drift apart.
+- A migration without a working rollback fails CI.
+- Pinned versions need periodic, deliberate updates.
+- Continuous delivery (image publishing, applying migrations to an environment) needs its own ADR when an environment exists.
