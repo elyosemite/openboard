@@ -4,7 +4,7 @@
 
 ## Como rodar localmente
 
-Pré-requisitos: Docker. Para desenvolver: Go 1.25+, Node 24+ e pnpm 10+.
+Pré-requisitos: Docker. Para desenvolver: Go 1.26+, Node 24+ e pnpm 10+.
 
 ```bash
 docker compose up -d --build   # postgres + liquibase + backend + frontend

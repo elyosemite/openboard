@@ -4,7 +4,7 @@
 
 ## Running locally
 
-Requirements: Docker. For development: Go 1.25+, Node 24+ and pnpm 10+.
+Requirements: Docker. For development: Go 1.26+, Node 24+ and pnpm 10+.
 
 ```bash
 docker compose up -d --build   # postgres + liquibase + backend + frontend

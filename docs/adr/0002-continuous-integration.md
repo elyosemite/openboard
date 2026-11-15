@@ -11,7 +11,7 @@ Every change must pass the quality gates in `CLAUDE.md` (formatting, lint, compl
 
 A single GitHub Actions workflow, `.github/workflows/ci.yml`, runs on every pull request and on every push to `main`, with independent parallel jobs:
 
-1. **Backend**: `task backend:check` (the same entry point developers run locally) plus `govulncheck`. Go runs on the latest 1.25 patch release, so stdlib fixes are picked up without editing `go.mod`.
+1. **Backend**: `task backend:check` (the same entry point developers run locally) plus `govulncheck`. Go runs on the latest 1.26 patch release, so stdlib fixes are picked up without editing `go.mod`.
 2. **Frontend**: `task frontend:check` plus a production build.
 3. **Database migrations**: builds the `database/` runner image and, against a throwaway PostgreSQL service, runs `liquibase validate` and `liquibase update-testing-rollback` (apply, roll back, re-apply every changeset).
 4. **API contract**: Redocly lint of `docs/api/openapi.yaml`.
