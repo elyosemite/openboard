@@ -1,0 +1,104 @@
+openapi: 3.1.0
+info:
+  title: OpenBoard API
+  version: 0.1.0
+  description: |
+    Authoritative contract of the OpenBoard HTTP API (see api.md).
+    Domain resources live under /api/v1. Operational probes live at the root
+    because they are not domain resources.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: operations
+    description: Liveness and readiness probes.
+paths:
+  /healthz:
+    get:
+      tags: [operations]
+      operationId: getLiveness
+      summary: Liveness probe
+      description: Reports that the process is running. Never checks dependencies.
+      security: []
+      responses:
+        "200":
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+              example:
+                status: ok
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /readyz:
+    get:
+      tags: [operations]
+      operationId: getReadiness
+      summary: Readiness probe
+      description: Reports whether every dependency required to serve traffic is reachable.
+      security: []
+      responses:
+        "200":
+          description: Ready to serve traffic.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+              example:
+                status: ready
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "503":
+          description: A dependency is not ready. The failing dependency is logged, not exposed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/service-unavailable
+                title: Service unavailable
+                status: 503
+                instance: /readyz
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, ready]
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details. Returned by every error response.
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: Stable identifier of the problem type.
+        title:
+          type: string
+          description: Short, human-readable summary of the problem type.
+        status:
+          type: integer
+          description: HTTP status code.
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          description: Request path where the problem occurred.
+  responses:
+    MethodNotAllowed:
+      description: The path exists but does not accept this method. See the Allow header.
+      headers:
+        Allow:
+          schema:
+            type: string
+          example: GET, HEAD
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
