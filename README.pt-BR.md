@@ -20,7 +20,7 @@ docker compose up -d --build   # postgres + liquibase + backend + frontend
 | `database/` | Migrations Liquibase e a imagem que as aplica |
 | `docs/` | ADRs (`docs/adr`) e contrato OpenAPI (`docs/api/openapi.yaml`) |
 
-Verificações de qualidade: `make check` (veja o `Makefile`). Padrões do projeto: [`api.md`](api.md) e [`Database.md`](Database.md).
+Verificações de qualidade: `task check` (veja o `Taskfile.yml`; instale o [Task](https://taskfile.dev) com `go install github.com/go-task/task/v3/cmd/task@latest`). Padrões do projeto: [`api.md`](api.md) e [`Database.md`](Database.md).
 
 ## 1. Visão geral
 
