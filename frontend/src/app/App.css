@@ -1,0 +1,20 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  padding: var(--ob-space-4) var(--ob-space-6);
+  background: var(--ob-color-surface);
+  border-bottom: 1px solid var(--ob-color-border);
+}
+
+.app-header h1 {
+  font-size: 1.25rem;
+  color: var(--ob-color-primary);
+}
+
+.app-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--ob-space-8) var(--ob-space-4);
+}
