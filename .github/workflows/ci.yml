@@ -45,7 +45,7 @@ jobs:
         run: |
           go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
           go install github.com/uudashr/gocognit/cmd/gocognit@v1.3.0
-          go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+          go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
 
       - name: Quality gates
         run: task backend:check
