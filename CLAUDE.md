@@ -1,6 +1,10 @@
 # OpenBoard — instruções para o Claude
 
-Contexto completo do produto e da arquitetura: `README.md` (inglês, principal) e `README.pt-BR.md` (português). Leia a seção relevante antes de cada tarefa e mantenha as duas versões sincronizadas.
+Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês) e `docs/product-vision.pt-BR.md` (português). Leia a seção relevante antes de cada tarefa.
+
+- Use os termos do glossário de domínio em `CONTEXT.md` (código, API, testes, conversas).
+- Papéis dos documentos: `README.md` é a vitrine pública do projeto; este `CLAUDE.md` guarda regras recorrentes; decisões arquiteturais ficam em ADRs (`docs/adr/`); `CONTEXT.md` é só glossário. Não duplique conteúdo entre eles.
+- Mantenha as versões em inglês e português (README e visão do produto) sincronizadas.
 
 ## Como trabalhamos
 
@@ -25,7 +29,8 @@ Contexto completo do produto e da arquitetura: `README.md` (inglês, principal) 
 - Regras de negócio não dependem de PostgreSQL nem de HTTP.
 - Sempre: `context.Context` propagado, erros tratados de forma centralizada, logs estruturados (`log/slog`), configuração por variáveis de ambiente.
 - Toda e qualquer migration é feita com **Liquibase** (nunca ferramenta de migration em Go nem SQL solto aplicado à mão). As migrations são aplicadas pelo pipeline de CD.
-- Autorização sempre validada no backend; dados isolados por Organization/Workspace.
+- Autorização sempre validada no backend.
+- A Organization é o tenant (ADR 0003): todo dado de domínio pertence a uma Organization e nunca cruza para outra; Workspace só restringe visibilidade dentro dela.
 - Ferramentas: `gofmt`, `go vet`, `golangci-lint`, `gocyclo -over 10`, `gocognit -over 15`.
 
 ## Banco de dados
