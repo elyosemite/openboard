@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "sonarqube-local": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "--init",
+        "-i",
+        "--rm",
+        "-e",
+        "SONARQUBE_TOKEN",
+        "-e",
+        "SONARQUBE_URL=http://host.docker.internal:9000",
+        "mcp/sonarqube"
+      ],
+      "env": {
+        "SONARQUBE_TOKEN": "${OPENBOARD_SONAR_TOKEN}"
+      }
+    }
+  }
+}
