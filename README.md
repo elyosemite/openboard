@@ -1,230 +1,252 @@
 # OpenBoard
 
-## 1. Visão geral
+**English** | [Português (Brasil)](README.pt-BR.md)
 
-O **OpenBoard** será uma plataforma open source de gerenciamento de projetos e acompanhamento de trabalho (*Project Management & Work Tracking*), inspirada em soluções consolidadas como Azure DevOps Boards, Jira e Plane.
+## Running locally
 
-Seu propósito é oferecer uma alternativa moderna, flexível e extensível para que empresas, equipes de engenharia e organizações possam planejar, organizar, acompanhar e analisar seu trabalho em um único ambiente.
+Requirements: Docker. For development: Go 1.25+, Node 24+ and pnpm 10+.
 
-A plataforma será desenvolvida com foco em duas modalidades de implantação: **Self-hosted e Cloud**. O modelo Self-hosted permitirá que organizações instalem e executem sua própria instância do OpenBoard em servidores internos ou infraestrutura cloud de sua preferência, mantendo controle sobre seus dados, configurações e políticas de acesso.
+```bash
+docker compose up -d --build   # postgres + liquibase + backend + frontend
+```
 
-O OpenBoard deverá atender desde pequenas equipes até organizações com estruturas complexas, múltiplos departamentos, equipes e projetos, oferecendo recursos para colaboração, planejamento, execução, documentação e análise de atividades.
+- Frontend: http://localhost:3000
+- API: http://localhost:8080 (`/healthz`, `/readyz`)
 
-Sua arquitetura será organizada em subdomínios funcionais, com responsabilidades bem definidas, permitindo que a plataforma evolua de maneira modular sem comprometer a consistência do domínio central.
+| Directory | Contents |
+|---|---|
+| `backend/` | Go API (modular monolith) |
+| `frontend/` | React + TypeScript app |
+| `database/` | Liquibase migrations and the image that applies them |
+| `docs/` | ADRs (`docs/adr`) and the OpenAPI contract (`docs/api/openapi.yaml`) |
 
-## 2. Estrutura organizacional
+Quality checks: `make check` (see the `Makefile`). Project standards: [`api.md`](api.md) and [`Database.md`](Database.md).
 
-A estrutura organizacional será o principal fundamento do OpenBoard. Ela definirá como usuários, equipes e projetos se relacionam dentro da plataforma.
+## 1. Overview
 
-Os quatro conceitos centrais serão Organizations, Workspaces, Teams e Projects.
+**OpenBoard** will be an open source project management and work tracking platform, inspired by established tools such as Azure DevOps Boards, Jira and Plane.
+
+Its purpose is to offer a modern, flexible and extensible alternative so that companies, engineering teams and organizations can plan, organize, track and analyze their work in a single environment.
+
+The platform is designed for two deployment models: **Self-hosted and Cloud**. The self-hosted model lets organizations install and run their own OpenBoard instance on internal servers or on the cloud infrastructure of their choice, keeping control over their data, configuration and access policies.
+
+OpenBoard should serve everyone from small teams to organizations with complex structures, multiple departments, teams and projects, offering features for collaboration, planning, execution, documentation and activity analysis.
+
+Its architecture is organized into functional subdomains with well-defined responsibilities, so the platform can evolve modularly without compromising the consistency of the core domain.
+
+## 2. Organizational structure
+
+The organizational structure is the main foundation of OpenBoard. It defines how users, teams and projects relate to each other within the platform.
+
+The four core concepts are Organizations, Workspaces, Teams and Projects.
 
 ### 2.1. Organizations
 
-Organizations representarão as organizações ou empresas que utilizam o OpenBoard.
+Organizations represent the organizations or companies that use OpenBoard.
 
-Cada organização terá seu próprio contexto administrativo, podendo gerenciar usuários, membros, configurações e diferentes espaços de trabalho.
+Each organization has its own administrative context and can manage users, members, settings and different workspaces.
 
-Uma Organization será responsável por centralizar a administração e estabelecer as fronteiras organizacionais de acesso e colaboração.
+An Organization centralizes administration and establishes the organizational boundaries for access and collaboration.
 
 ### 2.2. Workspaces
 
-Workspaces serão espaços de trabalho independentes dentro de uma Organization, permitindo separar diferentes áreas, departamentos, unidades de negócio ou contextos de trabalho.
+Workspaces are independent work areas within an Organization, used to separate different areas, departments, business units or work contexts.
 
-Cada Workspace poderá possuir suas próprias equipes, projetos, configurações e estruturas de organização.
+Each Workspace can have its own teams, projects, settings and organizational structures.
 
-O objetivo é permitir que uma mesma organização mantenha diferentes ambientes de trabalho sem misturar atividades, informações e responsabilidades.
+The goal is to let a single organization keep different work environments without mixing activities, information and responsibilities.
 
 ### 2.3. Teams
 
-Teams representarão grupos de pessoas que trabalham em conjunto dentro de um Workspace.
+Teams represent groups of people working together within a Workspace.
 
-Cada equipe poderá possuir membros, responsáveis, configurações e projetos associados.
+Each team can have members, leads, settings and associated projects.
 
-As equipes serão fundamentais para organizar responsabilidades, distribuir atividades e acompanhar a execução do trabalho.
+Teams are essential for organizing responsibilities, distributing work and tracking execution.
 
 ### 2.4. Projects
 
-Projects serão as unidades centrais de gerenciamento e execução do trabalho.
+Projects are the central units of work management and execution.
 
-Cada projeto poderá possuir seus próprios Work Items, Eras, Modules, Views, Pages e indicadores de Analytics.
+Each project can have its own Work Items, Eras, Modules, Views, Pages and Analytics indicators.
 
-Os projetos poderão estar associados a uma ou mais equipes, permitindo diferentes modelos de colaboração conforme as necessidades da organização.
+Projects can be associated with one or more teams, enabling different collaboration models according to each organization's needs.
 
-## 3. Subdomínios funcionais
+## 3. Functional subdomains
 
-A plataforma será organizada em subdomínios que representam diferentes capacidades do sistema. Alguns deles constituirão o núcleo inicial do produto, enquanto outros serão desenvolvidos progressivamente.
+The platform is organized into subdomains that represent different system capabilities. Some form the initial core of the product; others will be built progressively.
 
 ### 3.1. Work Items
 
-Work Items serão a unidade fundamental de trabalho do OpenBoard.
+Work Items are the fundamental unit of work in OpenBoard.
 
-Representarão atividades que precisam ser planejadas, executadas e acompanhadas ao longo do ciclo de vida de um projeto.
+They represent activities that need to be planned, executed and tracked throughout a project's lifecycle.
 
-Cada item poderá conter título, descrição, responsável, prioridade, status, prazo, estimativa de esforço, labels, anexos e comentários.
+Each item can contain a title, description, assignee, priority, status, due date, effort estimate, labels, attachments and comments.
 
-Um editor de texto rico permitirá documentar requisitos, registrar decisões técnicas, compartilhar imagens e anexar arquivos.
+A rich text editor lets users document requirements, record technical decisions, share images and attach files.
 
-Também será possível estabelecer relações entre diferentes Work Items, como dependências, bloqueios, itens relacionados, subtarefas e hierarquias de trabalho.
+Work Items can also be related to each other through dependencies, blockers, related items, subtasks and work hierarchies.
 
-Tipos de Work Items poderão incluir Epics, Features, Tasks, Bugs e Subtasks, com possibilidade de personalização conforme as necessidades de cada organização.
+Work Item types may include Epics, Features, Tasks, Bugs and Subtasks, customizable to each organization's needs.
 
 ### 3.2. Eras
 
-Eras serão períodos ou ciclos de execução utilizados para organizar o trabalho de uma equipe.
+Eras are execution periods or cycles used to organize a team's work.
 
-Conceitualmente, serão semelhantes aos Sprints do Scrum e aos Cycles de ferramentas como Plane.
+Conceptually, they are similar to Scrum Sprints and to Cycles in tools such as Plane.
 
-Cada Era terá data de início, data de encerramento, objetivos e um conjunto de Work Items associados.
+Each Era has a start date, an end date, goals and a set of associated Work Items.
 
-As equipes poderão planejar suas atividades, acompanhar o progresso e avaliar o que foi concluído durante determinado período.
+Teams can plan their activities, track progress and review what was completed during a given period.
 
-O acompanhamento incluirá indicadores como progresso geral, itens concluídos e pendentes, estimativas de esforço, Burndown Charts e Burnup Charts.
+Tracking includes indicators such as overall progress, completed and pending items, effort estimates, burndown charts and burnup charts.
 
 ### 3.3. Modules
 
-Modules permitirão dividir projetos maiores em unidades menores e mais gerenciáveis.
+Modules split larger projects into smaller, more manageable units.
 
-Cada módulo poderá representar uma funcionalidade, subsistema, componente de software, departamento ou qualquer outra divisão lógica definida pela organização.
+Each module can represent a feature, subsystem, software component, department or any other logical division defined by the organization.
 
-Os módulos agruparão Work Items relacionados, permitindo acompanhar o progresso de iniciativas específicas sem perder a visão geral do projeto.
+Modules group related Work Items, making it possible to track specific initiatives without losing sight of the overall project.
 
 ### 3.4. Views
 
-Views oferecerão diferentes formas de visualizar e organizar os Work Items.
+Views offer different ways to visualize and organize Work Items.
 
-As visualizações poderão incluir:
+Views may include:
 
-- List View: organização tabular dos itens.
-- Board View: visualização Kanban organizada por status.
-- Calendar View: acompanhamento de prazos e datas.
-- Timeline View: visualização temporal das atividades e dependências.
+- List View: tabular organization of items.
+- Board View: Kanban board organized by status.
+- Calendar View: tracking of deadlines and dates.
+- Timeline View: time-based view of activities and dependencies.
 
-Os usuários poderão criar filtros personalizados utilizando propriedades como responsável, prioridade, status, módulo, Era, labels e datas.
+Users can create custom filters using properties such as assignee, priority, status, module, Era, labels and dates.
 
-As Views poderão ser salvas, compartilhadas entre membros da equipe e reutilizadas.
+Views can be saved, shared with team members and reused.
 
 ### 3.5. Pages
 
-Pages serão espaços de documentação integrados ao gerenciamento de projetos.
+Pages are documentation spaces integrated with project management.
 
-Permitirão documentar ideias, requisitos, decisões arquiteturais, atas de reuniões, especificações técnicas e outros conhecimentos relacionados ao projeto.
+They let teams document ideas, requirements, architectural decisions, meeting notes, technical specifications and other project knowledge.
 
-Cada página contará com um editor de texto rico, suporte a imagens, hyperlinks, anexos, formatação avançada e referências a Work Items existentes.
+Each page has a rich text editor with support for images, hyperlinks, attachments, advanced formatting and references to existing Work Items.
 
-Uma ideia registrada em uma página poderá ser transformada em um Work Item, aproximando documentação e execução.
+An idea recorded on a page can be turned into a Work Item, bringing documentation and execution closer together.
 
-A arquitetura também deverá permitir futuras integrações com recursos de inteligência artificial para auxiliar na criação, organização e sumarização de documentos.
+The architecture should also allow future integration with artificial intelligence features to help create, organize and summarize documents.
 
 ### 3.6. Analytics
 
-Analytics fornecerá uma visão consolidada dos dados dos projetos, permitindo que equipes e gestores acompanhem a evolução do trabalho por meio de indicadores e visualizações.
+Analytics provides a consolidated view of project data, so teams and managers can follow how work evolves through indicators and visualizations.
 
-Entre os indicadores previstos estão:
+Planned indicators include:
 
-- Distribuição de Work Items por status, prioridade e responsável.
-- Velocidade de execução das equipes.
-- Progresso das Eras.
-- Burndown e Burnup.
-- Lead Time e Cycle Time.
-- Identificação de atividades bloqueadas.
-- Evolução das entregas ao longo do tempo.
+- Distribution of Work Items by status, priority and assignee.
+- Team velocity.
+- Era progress.
+- Burndown and burnup.
+- Lead time and cycle time.
+- Identification of blocked work.
+- Delivery trends over time.
 
-O objetivo será facilitar a identificação de gargalos, compreender a capacidade operacional das equipes e apoiar decisões baseadas em dados.
+The goal is to make bottlenecks easier to spot, help understand team capacity and support data-driven decisions.
 
-## 4. Subdomínios de suporte e infraestrutura funcional
+## 4. Supporting subdomains and functional infrastructure
 
-Além dos subdomínios diretamente relacionados à organização e execução do trabalho, o OpenBoard contará com capacidades transversais responsáveis por sustentar a operação da plataforma.
+Beyond the subdomains directly tied to organizing and executing work, OpenBoard will have cross-cutting capabilities that keep the platform running.
 
-Esses subdomínios serão desenvolvidos progressivamente.
+These subdomains will be built progressively.
 
 ### 4.1. Workflow Engine
 
-Mecanismo responsável por definir e executar os fluxos de trabalho dos Work Items.
+Defines and runs Work Item workflows.
 
-Permitirá configurar estados, transições, regras e restrições, possibilitando que cada organização adapte seus processos operacionais.
+It will allow configuring states, transitions, rules and constraints, so each organization can adapt its operational processes.
 
 ### 4.2. Automations
 
-Sistema de automações baseado em eventos e condições.
+An automation system based on events and conditions.
 
-Permitirá executar ações automaticamente a partir de determinados acontecimentos, como alterações de status, atribuições, vencimentos e criação de Work Items.
+It will run actions automatically when certain things happen, such as status changes, assignments, due dates and Work Item creation.
 
 ### 4.3. Integrations
 
-Camada responsável pela integração com ferramentas e serviços externos.
+The layer responsible for integrating with external tools and services.
 
-Poderá oferecer integrações com GitHub, GitLab, Bitbucket, Slack, Microsoft Teams e outras plataformas utilizadas pelas equipes.
+It may offer integrations with GitHub, GitLab, Bitbucket, Slack, Microsoft Teams and other platforms teams use.
 
 ### 4.4. RBAC
 
-Sistema de controle de acesso baseado em papéis (*Role-Based Access Control*).
+Role-Based Access Control.
 
-Será responsável por gerenciar permissões e controlar quais recursos e operações estarão disponíveis para cada usuário dentro de uma Organization, Workspace, Team ou Project.
+It manages permissions and controls which resources and operations are available to each user within an Organization, Workspace, Team or Project.
 
 ### 4.5. Audit Logs
 
-Sistema de auditoria responsável por registrar eventos e alterações relevantes dentro da plataforma.
+An audit system that records relevant events and changes within the platform.
 
-Permitirá rastrear operações, identificar responsáveis por alterações e consultar o histórico de atividades.
+It will make it possible to trace operations, identify who made changes and browse activity history.
 
 ### 4.6. Notifications
 
-Sistema de notificações responsável por informar os usuários sobre acontecimentos relevantes.
+A notification system that informs users about relevant events.
 
-Incluirá notificações sobre atribuições, comentários, menções, alterações de status, prazos e outras atividades relacionadas aos projetos.
+It will include notifications about assignments, comments, mentions, status changes, deadlines and other project activity.
 
-## 5. Princípios do projeto
+## 5. Project principles
 
-O desenvolvimento do OpenBoard será orientado pelos seguintes princípios:
+OpenBoard development is guided by the following principles:
 
-- **Open Source:** código-fonte aberto, permitindo auditoria, colaboração e evolução pela comunidade.
-- **Self-hosted First:** projetado para funcionar em infraestrutura própria, sem dependência obrigatória de serviços externos.
-- **Cloud Ready:** arquitetura preparada para oferecer uma modalidade Cloud.
-- **Data Ownership:** respeito à propriedade e ao controle dos dados pelas organizações.
-- **Modular Architecture:** subdomínios com responsabilidades e limites bem definidos.
-- **Extensibility:** arquitetura preparada para integrações, plugins, automações e funcionalidades desenvolvidas pela comunidade.
-- **Multi-tenant:** suporte a múltiplas organizações e espaços de trabalho, com isolamento adequado de dados e permissões.
-- **Customizable Workflows:** possibilidade de adaptar fluxos de trabalho, propriedades e processos às necessidades de cada organização.
-- **Developer Experience:** experiência especialmente cuidadosa para equipes de engenharia de software, sem limitar o uso a esse público.
+- **Open Source:** open source code, enabling auditing, collaboration and community-driven evolution.
+- **Self-hosted First:** designed to run on your own infrastructure, with no mandatory dependency on external services.
+- **Cloud Ready:** architecture prepared to offer a Cloud offering.
+- **Data Ownership:** organizations own and control their data.
+- **Modular Architecture:** subdomains with well-defined responsibilities and boundaries.
+- **Extensibility:** architecture prepared for integrations, plugins, automations and community-built features.
+- **Multi-tenant:** support for multiple organizations and workspaces, with proper isolation of data and permissions.
+- **Customizable Workflows:** workflows, properties and processes can be adapted to each organization's needs.
+- **Developer Experience:** a particularly polished experience for software engineering teams, without limiting use to that audience.
 
-## 6. Objetivo de longo prazo
+## 6. Long-term goal
 
-O OpenBoard pretende se tornar uma plataforma completa de gerenciamento de trabalho, capaz de atender diferentes modelos de organização e metodologias de execução.
+OpenBoard aims to become a complete work management platform, able to support different organizational models and execution methodologies.
 
-Mais do que reproduzir funcionalidades existentes em ferramentas comerciais, o projeto busca oferecer uma alternativa aberta, independente e extensível, na qual organizações possam construir seus próprios processos de trabalho sem abrir mão da propriedade dos dados, da flexibilidade operacional e da liberdade tecnológica.
+Rather than copying features from commercial tools, the project seeks to offer an open, independent and extensible alternative in which organizations can build their own work processes without giving up data ownership, operational flexibility or technological freedom.
 
-## 7. Especificações técnicas e arquitetura
+## 7. Technical specifications and architecture
 
-O OpenBoard deverá ser desenvolvido seguindo boas práticas de engenharia de software, priorizando manutenibilidade, segurança, escalabilidade, testabilidade e simplicidade arquitetural.
+OpenBoard should be built following sound software engineering practices, prioritizing maintainability, security, scalability, testability and architectural simplicity.
 
-As decisões técnicas deverão considerar tanto a modalidade Self-hosted quanto a modalidade Cloud, evitando dependências desnecessárias de provedores específicos e garantindo que a aplicação possa ser executada em diferentes ambientes de infraestrutura.
+Technical decisions must consider both the self-hosted and the Cloud models, avoiding unnecessary dependencies on specific providers and ensuring the application can run on different infrastructure environments.
 
-### 7.1. Stack tecnológica
+### 7.1. Technology stack
 
-As tecnologias principais do projeto serão:
+The main technologies are:
 
 - **Backend:** Go (Golang).
 - **Frontend:** React.
-- **Linguagem do frontend:** TypeScript.
-- **Build e dependências do frontend:** Node.js, utilizando um gerenciador de pacotes consistente.
-- **Containerização:** Docker e Docker Compose.
+- **Frontend language:** TypeScript.
+- **Frontend build and dependencies:** Node.js, with a consistent package manager.
+- **Containerization:** Docker and Docker Compose.
 - **CI/CD:** GitHub Actions.
-- **Controle de versão:** Git e GitHub.
-- **Banco de dados principal:** PostgreSQL.
+- **Version control:** Git and GitHub.
+- **Primary database:** PostgreSQL.
 
-A escolha das tecnologias deverá priorizar estabilidade, maturidade do ecossistema, facilidade de manutenção e disponibilidade de ferramentas para desenvolvimento e observabilidade.
+Technology choices should prioritize stability, ecosystem maturity, ease of maintenance and the availability of development and observability tooling.
 
-### 7.2. Arquitetura do backend
+### 7.2. Backend architecture
 
-O backend será desenvolvido em Go, utilizando uma arquitetura organizada por domínios e responsabilidades.
+The backend is written in Go, with an architecture organized by domains and responsibilities.
 
-O projeto deverá adotar princípios de Domain-Driven Design (DDD) quando agregarem valor à organização do domínio, mantendo separação clara entre regras de negócio, aplicação, infraestrutura e interfaces de comunicação.
+The project should adopt Domain-Driven Design (DDD) principles where they add value to the domain model, keeping a clear separation between business rules, application, infrastructure and communication interfaces.
 
-A organização do código deverá favorecer modularidade, baixo acoplamento e alta coesão, evitando tanto a criação de um monólito desorganizado quanto a fragmentação prematura em microserviços.
+Code organization should favor modularity, low coupling and high cohesion, avoiding both a disorganized monolith and premature fragmentation into microservices.
 
-A arquitetura inicial deverá seguir uma abordagem de **Modular Monolith**, na qual os subdomínios possuem limites bem definidos e podem evoluir independentemente dentro de uma única aplicação.
+The initial architecture follows a **Modular Monolith** approach, in which subdomains have well-defined boundaries and can evolve independently within a single application.
 
-Os principais módulos deverão incluir:
+The main modules include:
 
 - Organizations
 - Workspaces
@@ -243,184 +265,184 @@ Os principais módulos deverão incluir:
 - Audit Logs
 - Notifications
 
-Cada módulo deverá manter suas próprias responsabilidades, regras de negócio e interfaces de comunicação.
+Each module keeps its own responsibilities, business rules and communication interfaces.
 
-O backend deverá disponibilizar uma API HTTP bem definida, preferencialmente RESTful, com contratos consistentes, versionamento e documentação OpenAPI.
+The backend exposes a well-defined HTTP API, preferably RESTful, with consistent contracts, versioning and OpenAPI documentation.
 
-Requisitos adicionais:
+Additional requirements:
 
-- Tratamento centralizado de erros.
-- Validação de entradas e regras de negócio.
-- Logs estruturados.
-- Context propagation e suporte a cancelamento de operações.
-- Gerenciamento adequado de concorrência.
-- Configuração por variáveis de ambiente.
-- Migrations versionadas para o banco de dados.
-- Testes unitários, de integração e de arquitetura.
+- Centralized error handling.
+- Input and business rule validation.
+- Structured logging.
+- Context propagation and support for cancelling operations.
+- Proper concurrency management.
+- Configuration through environment variables.
+- Versioned database migrations.
+- Unit, integration and architecture tests.
 - Graceful shutdown.
-- Health checks e readiness checks.
+- Health checks and readiness checks.
 
-### 7.3. Arquitetura do frontend
+### 7.3. Frontend architecture
 
-O frontend será desenvolvido em React com TypeScript.
+The frontend is written in React with TypeScript.
 
-A aplicação deverá adotar uma arquitetura modular, organizada por funcionalidades e domínios, evitando uma estrutura excessivamente centralizada ou baseada apenas em componentes genéricos.
+The application should follow a modular architecture organized by features and domains, avoiding an overly centralized structure or one based only on generic components.
 
-A interface deverá ser responsiva, acessível e consistente, priorizando uma experiência de uso intuitiva para equipes que trabalham diariamente com gerenciamento de projetos.
+The interface should be responsive, accessible and consistent, prioritizing an intuitive experience for teams that work with project management every day.
 
-A estrutura deverá contemplar:
+The structure should include:
 
-- Componentes reutilizáveis.
-- Design System centralizado.
-- Gerenciamento consistente de estado.
-- Camada de comunicação com a API.
-- Tratamento padronizado de erros.
-- Controle de autenticação e autorização na interface.
-- Rotas organizadas por contexto funcional.
-- Formulários com validação.
-- Estratégia de cache e sincronização de dados.
-- Testes unitários e de componentes.
-- Testes de integração e end-to-end.
+- Reusable components.
+- A centralized design system.
+- Consistent state management.
+- An API communication layer.
+- Standardized error handling.
+- Authentication and authorization controls in the UI.
+- Routes organized by functional context.
+- Validated forms.
+- A data caching and synchronization strategy.
+- Unit and component tests.
+- Integration and end-to-end tests.
 
-O frontend deverá manter uma separação clara entre apresentação, estado da aplicação, regras de interação e comunicação com o backend.
+The frontend should keep a clear separation between presentation, application state, interaction rules and backend communication.
 
-### 7.4. Banco de dados e persistência
+### 7.4. Database and persistence
 
-O PostgreSQL será o banco de dados relacional principal da plataforma.
+PostgreSQL is the platform's primary relational database.
 
-A modelagem deverá refletir os limites do domínio e preservar a integridade dos relacionamentos entre Organizations, Workspaces, Teams, Projects e demais entidades.
+The data model should reflect domain boundaries and preserve the integrity of relationships between Organizations, Workspaces, Teams, Projects and other entities.
 
-Requisitos:
+Requirements:
 
-- Migrations versionadas e reproduzíveis.
-- Integridade referencial.
-- Índices planejados de acordo com os padrões de consulta.
-- Transações para operações que exijam consistência.
-- Estratégias de paginação para coleções extensas.
-- Auditoria de alterações relevantes.
-- Isolamento adequado dos dados entre organizações e workspaces.
-- Estratégias de backup e restauração.
+- Versioned, reproducible migrations.
+- Referential integrity.
+- Indexes planned around query patterns.
+- Transactions for operations that require consistency.
+- Pagination strategies for large collections.
+- Auditing of relevant changes.
+- Proper data isolation between organizations and workspaces.
+- Backup and restore strategies.
 
-O acesso ao banco de dados deverá ocorrer por meio de uma camada de persistência bem definida, evitando que regras de negócio dependam diretamente de detalhes específicos do PostgreSQL.
+Database access goes through a well-defined persistence layer, so business rules do not depend directly on PostgreSQL-specific details.
 
-### 7.5. Containerização e infraestrutura
+### 7.5. Containerization and infrastructure
 
-O OpenBoard deverá ser distribuído utilizando containers Docker.
+OpenBoard is distributed as Docker containers.
 
-O repositório deverá possuir Dockerfiles específicos para backend e frontend, priorizando imagens pequenas, builds reproduzíveis e segurança durante a execução.
+The repository has dedicated Dockerfiles for the backend and the frontend, prioritizing small images, reproducible builds and runtime security.
 
-Os Dockerfiles deverão seguir boas práticas como:
+Dockerfiles should follow good practices such as:
 
 - Multi-stage builds.
-- Imagens base oficiais e confiáveis.
-- Execução com usuário não privilegiado.
-- Separação entre dependências de build e runtime.
-- Redução da superfície de ataque.
-- Configuração por variáveis de ambiente.
-- Health checks quando aplicáveis.
+- Official, trusted base images.
+- Running as a non-privileged user.
+- Separating build and runtime dependencies.
+- Reducing the attack surface.
+- Configuration through environment variables.
+- Health checks where applicable.
 
-O projeto deverá disponibilizar um Docker Compose para facilitar a execução local e a instalação self-hosted.
+The project provides a Docker Compose setup to make local execution and self-hosted installation easier.
 
-A infraestrutura inicial deverá permitir executar os componentes essenciais da plataforma sem exigir serviços externos obrigatórios.
+The initial infrastructure should run the platform's essential components without requiring mandatory external services.
 
-### 7.6. CI/CD e automação de desenvolvimento
+### 7.6. CI/CD and development automation
 
-O processo de integração e entrega contínuas será implementado utilizando GitHub Actions.
+Continuous integration and delivery are implemented with GitHub Actions.
 
-O pipeline deverá automatizar verificações de qualidade, testes e geração de artefatos, garantindo que alterações no código não comprometam a estabilidade do projeto.
+The pipeline automates quality checks, tests and artifact generation, ensuring code changes do not compromise project stability.
 
-O pipeline deverá contemplar:
+The pipeline should cover:
 
-- Verificação de formatação e lint.
-- Análise estática de código.
-- Compilação do backend.
-- Build do frontend.
-- Testes unitários.
-- Testes de integração.
-- Verificação de dependências e vulnerabilidades.
-- Build das imagens Docker.
-- Publicação de imagens no GitHub Container Registry (GHCR).
-- Geração de artefatos versionados.
+- Formatting and lint checks.
+- Static code analysis.
+- Backend compilation.
+- Frontend build.
+- Unit tests.
+- Integration tests.
+- Dependency and vulnerability scanning.
+- Docker image builds.
+- Image publishing to the GitHub Container Registry (GHCR).
+- Versioned artifacts.
 
-O fluxo deverá considerar diferentes etapas, como Pull Requests, integração na branch principal, criação de releases e publicação de versões.
+The flow should account for different stages, such as pull requests, integration into the main branch, release creation and version publishing.
 
-As releases deverão possuir versionamento consistente, preferencialmente seguindo Semantic Versioning.
+Releases should be versioned consistently, preferably following Semantic Versioning.
 
-### 7.7. Qualidade e testes
+### 7.7. Quality and testing
 
-A qualidade deverá ser tratada como parte integrante do processo de desenvolvimento.
+Quality is an integral part of the development process.
 
-O projeto deverá possuir uma estratégia de testes em diferentes níveis:
+The project has a testing strategy at several levels:
 
-- **Unit Tests:** validação isolada de regras de negócio e componentes.
-- **Integration Tests:** validação da comunicação entre módulos e infraestrutura.
-- **End-to-End Tests:** validação dos principais fluxos de utilização da plataforma.
-- **Architecture Tests:** verificação de dependências e limites arquiteturais.
+- **Unit Tests:** isolated validation of business rules and components.
+- **Integration Tests:** validation of communication between modules and infrastructure.
+- **End-to-End Tests:** validation of the platform's main user flows.
+- **Architecture Tests:** verification of dependencies and architectural boundaries.
 
-O código deverá passar por verificações automatizadas antes de ser integrado à branch principal.
+Code must pass automated checks before being merged into the main branch.
 
-Também deverão existir padrões de contribuição, revisão de código e documentação técnica para orientar colaboradores.
+There should also be contribution guidelines, code review standards and technical documentation to guide contributors.
 
-### 7.8. Segurança
+### 7.8. Security
 
-Segurança deverá ser considerada desde a concepção da arquitetura.
+Security is considered from the start of the architecture.
 
-A plataforma deverá implementar mecanismos adequados de autenticação, autorização e isolamento de dados.
+The platform should implement proper authentication, authorization and data isolation.
 
-Entre os requisitos iniciais:
+Initial requirements include:
 
-- Armazenamento seguro de credenciais.
-- Proteção contra acesso não autorizado.
-- Validação e sanitização de entradas.
-- Proteção contra vulnerabilidades comuns, incluindo as categorias relevantes do OWASP Top 10.
-- Gerenciamento seguro de secrets.
-- Princípio do menor privilégio.
-- Controle de acesso entre Organizations, Workspaces, Teams e Projects.
-- Registro de operações sensíveis.
-- Atualização e monitoramento de dependências vulneráveis.
+- Secure credential storage.
+- Protection against unauthorized access.
+- Input validation and sanitization.
+- Protection against common vulnerabilities, including the relevant OWASP Top 10 categories.
+- Secure secrets management.
+- Principle of least privilege.
+- Access control across Organizations, Workspaces, Teams and Projects.
+- Logging of sensitive operations.
+- Updating and monitoring vulnerable dependencies.
 
-A autorização deverá ser validada no backend, não podendo depender exclusivamente dos controles implementados na interface.
+Authorization must be validated on the backend and can never rely solely on controls implemented in the UI.
 
-### 7.9. Observabilidade e operação
+### 7.9. Observability and operations
 
-O OpenBoard deverá possuir mecanismos de observabilidade que permitam compreender o comportamento da aplicação em ambientes de desenvolvimento e produção.
+OpenBoard should provide observability mechanisms to understand the application's behavior in development and production.
 
-A implementação deverá contemplar:
+This includes:
 
-- Logs estruturados.
-- Métricas de aplicação e infraestrutura.
-- Rastreamento distribuído quando necessário.
+- Structured logs.
+- Application and infrastructure metrics.
+- Distributed tracing when needed.
 - Health checks.
-- Monitoramento de erros e falhas.
-- Identificação de operações lentas.
-- Correlação de requisições.
+- Error and failure monitoring.
+- Identification of slow operations.
+- Request correlation.
 
-A arquitetura deverá permitir futuras integrações com OpenTelemetry e ferramentas como Prometheus e Grafana.
+The architecture should allow future integration with OpenTelemetry and tools such as Prometheus and Grafana.
 
-### 7.10. Documentação e manutenção
+### 7.10. Documentation and maintenance
 
-O repositório deverá manter documentação técnica atualizada, incluindo:
+The repository keeps up-to-date technical documentation, including:
 
-- Instruções de instalação e execução local.
-- Guia de configuração self-hosted.
-- Arquitetura geral da aplicação.
-- Documentação dos módulos e seus limites.
-- Contratos e documentação da API.
-- Estratégia de testes.
-- Processo de contribuição.
-- Procedimentos de build, release e atualização.
+- Installation and local run instructions.
+- Self-hosted configuration guide.
+- Overall application architecture.
+- Module documentation and boundaries.
+- API contracts and documentation.
+- Testing strategy.
+- Contribution process.
+- Build, release and upgrade procedures.
 
-As decisões arquiteturais relevantes deverão ser documentadas por meio de Architecture Decision Records (ADRs), permitindo compreender os motivos das escolhas técnicas e sua evolução ao longo do projeto.
+Relevant architectural decisions are documented as Architecture Decision Records (ADRs), making it possible to understand the reasoning behind technical choices and how they evolve over time.
 
-### 7.11. Princípios arquiteturais
+### 7.11. Architectural principles
 
-O desenvolvimento técnico do OpenBoard deverá seguir estes princípios:
+OpenBoard's technical development follows these principles:
 
-1. **Simplicidade antes da complexidade:** não introduzir abstrações, serviços ou tecnologias sem uma necessidade concreta.
-2. **Modularidade:** manter os domínios isolados e com responsabilidades bem definidas.
-3. **Baixo acoplamento:** evitar dependências desnecessárias entre módulos.
-4. **Alta coesão:** manter regras e funcionalidades relacionadas dentro de seus respectivos domínios.
-5. **Testabilidade:** projetar componentes que possam ser testados de maneira isolada.
-6. **Segurança por padrão:** tratar segurança como requisito arquitetural, não como funcionalidade posterior.
-7. **Portabilidade:** evitar dependências obrigatórias de provedores específicos de infraestrutura.
-8. **Evolução incremental:** permitir que a plataforma cresça sem exigir reescritas arquiteturais constantes.
+1. **Simplicity before complexity:** do not introduce abstractions, services or technologies without a concrete need.
+2. **Modularity:** keep domains isolated with well-defined responsibilities.
+3. **Low coupling:** avoid unnecessary dependencies between modules.
+4. **High cohesion:** keep related rules and features within their respective domains.
+5. **Testability:** design components that can be tested in isolation.
+6. **Secure by default:** treat security as an architectural requirement, not a later feature.
+7. **Portability:** avoid mandatory dependencies on specific infrastructure providers.
+8. **Incremental evolution:** let the platform grow without constant architectural rewrites.
