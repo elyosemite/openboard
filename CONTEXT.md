@@ -156,6 +156,15 @@ _Avoid_: Closed, resolved, cancelled
 A time-boxed cycle of one Project, with a start date, an end date and goals, used to plan and track a slice of work.
 _Avoid_: Sprint, cycle, iteration
 
+**Planned Era**:
+An Era that has not started yet.
+
+**Active Era**:
+The Era in progress; a Project has at most one.
+
+**Completed Era**:
+An Era someone has closed; it keeps a record of what was in it when it ended.
+
 **Link**:
 A non-hierarchical relation between two Work Items of the same Project, of a fixed kind: Blocks, Duplicates or Relates To.
 _Avoid_: Relation, association, connection
@@ -231,6 +240,7 @@ _Avoid_: Removed, purged
 - A **Work Item** is always in exactly one **State**, and can move between any two **States**
 - An **Era** belongs to exactly one **Project**, and the **Eras** of a **Project** never overlap in time
 - A **Work Item** is in at most one **Era**, always of its own **Project**
+- Someone closes an **Active Era** (it does not end by date alone) and decides, for each unfinished **Work Item**, whether it moves to the next **Era** or leaves **Eras** altogether; its **State** never changes on closing
 - Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Subtasks** go with it, its other **Children** lose their **Parent**, and its **Links** disappear
 
 ### Lifecycle
