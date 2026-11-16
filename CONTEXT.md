@@ -143,6 +143,10 @@ _Avoid_: Estimate, effort, points
 An optional estimate of a Task or Subtask in hours of work.
 _Avoid_: Estimate, effort, time
 
+**Priority**:
+How urgent a Work Item is, on a fixed scale: Urgent, High, Medium, Low or No Priority (the default).
+_Avoid_: Severity, importance, rank
+
 **State**:
 Where a Work Item stands in its life: Backlog, To Do, In Progress or Done.
 _Avoid_: Status, stage, column
