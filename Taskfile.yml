@@ -55,6 +55,9 @@ tasks:
     desc: Tests with coverage profile (backend/coverage.out)
     dir: backend
     cmds:
+      # Integration tests apply the schema with this image; built once here
+      # instead of inside every test process (postgrestest).
+      - docker build -q -t openboard-migrations:test ../database
       - go test -coverprofile=coverage.out ./...
       - go tool cover -func=coverage.out
 

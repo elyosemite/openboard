@@ -1,19 +1,17 @@
 // Package postgrestest starts a throwaway PostgreSQL for integration tests,
 // with every Liquibase migration applied by the same runner image used in
-// compose and CI (database/Dockerfile). It requires Docker.
+// compose and CI (database/Dockerfile). It requires Docker and the runner
+// image built beforehand (task backend:test does it): building it inside
+// every test process ran the same build and driver download in parallel.
 package postgrestest
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 	"time"
 
+	"github.com/containerd/errdefs"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/network"
@@ -25,6 +23,11 @@ const (
 	databaseName = "openboard"
 	credential   = "openboard"
 	networkAlias = "postgres"
+	// MigrationsImage is the Liquibase runner image the tests apply the
+	// schema with. Build it from the repository root with:
+	//
+	//	docker build -t openboard-migrations:test database
+	MigrationsImage = "openboard-migrations:test"
 )
 
 // Database is a running throwaway PostgreSQL with the schema migrated.
@@ -79,16 +82,12 @@ func (db *Database) start(ctx context.Context) error {
 }
 
 func (db *Database) migrate(ctx context.Context, networkName string) error {
-	dir, err := databaseDir()
-	if err != nil {
+	if err := requireImage(ctx, MigrationsImage); err != nil {
 		return err
 	}
 	runner, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
-			FromDockerfile: testcontainers.FromDockerfile{
-				Context: dir, Dockerfile: "Dockerfile",
-				Repo: "openboard-migrations", Tag: "test", KeepImage: true,
-			},
+			Image:    MigrationsImage,
 			Networks: []string{networkName},
 			Cmd: []string{
 				"--changelog-file=migrations/changelog/db.changelog-master.yaml",
@@ -108,6 +107,24 @@ func (db *Database) migrate(ctx context.Context, networkName string) error {
 		return fmt.Errorf("run liquibase: %w", err)
 	}
 	return checkExit(ctx, runner)
+}
+
+// requireImage fails fast when the image was not built locally; otherwise
+// testcontainers would try, and retry, to pull it from a registry.
+func requireImage(ctx context.Context, name string) error {
+	cli, err := testcontainers.NewDockerClientWithOpts(ctx)
+	if err != nil {
+		return fmt.Errorf("docker client: %w", err)
+	}
+	defer func() { _ = cli.Close() }()
+	_, err = cli.ImageInspect(ctx, name)
+	if errdefs.IsNotFound(err) {
+		return fmt.Errorf("image %s not found: run `task backend:test`, or `docker build -t %s database` from the repository root", name, name)
+	}
+	if err != nil {
+		return fmt.Errorf("inspect image %s: %w", name, err)
+	}
+	return nil
 }
 
 func checkExit(ctx context.Context, c testcontainers.Container) error {
@@ -138,21 +155,4 @@ func (db *Database) Stop() {
 		_ = db.network.Remove(ctx)
 		db.network = nil
 	}
-}
-
-// databaseDir finds <repo>/database from this source file's location.
-func databaseDir() (string, error) {
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		return "", errors.New("locate postgrestest source")
-	}
-	dir := filepath.Dir(file)
-	for dir != filepath.Dir(dir) {
-		candidate := filepath.Join(dir, "database")
-		if _, err := os.Stat(filepath.Join(candidate, "Dockerfile")); err == nil {
-			return candidate, nil
-		}
-		dir = filepath.Dir(dir)
-	}
-	return "", fmt.Errorf("database/Dockerfile not found above %s", strings.TrimSpace(filepath.Dir(file)))
 }

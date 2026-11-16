@@ -2,8 +2,7 @@ package postgrestest
 
 import (
 	"context"
-	"os"
-	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/jackc/pgx/v5"
@@ -44,12 +43,12 @@ func TestStopIsIdempotent(t *testing.T) {
 	}
 }
 
-func TestDatabaseDirFindsTheRunnerImage(t *testing.T) {
-	dir, err := databaseDir()
-	if err != nil {
-		t.Fatalf("databaseDir: %v", err)
+func TestRequireImageExplainsHowToBuildAMissingImage(t *testing.T) {
+	err := requireImage(context.Background(), "openboard-migrations:does-not-exist")
+	if err == nil {
+		t.Fatal("a missing image should be an error")
 	}
-	if _, err := os.Stat(filepath.Join(dir, "migrations", "changelog", "db.changelog-master.yaml")); err != nil {
-		t.Errorf("master changelog not found under %s: %v", dir, err)
+	if !strings.Contains(err.Error(), "task backend:test") {
+		t.Errorf("error should say how to build the image, got: %v", err)
 	}
 }
