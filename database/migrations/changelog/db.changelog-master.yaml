@@ -19,6 +19,15 @@ databaseChangeLog:
   - include:
       file: ../tables/20261115221446_create_sessions_table.sql
       relativeToChangelogFile: true
+  - include:
+      file: ../tables/20261116190001_create_organizations_table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../tables/20261116190002_create_workspaces_table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../tables/20261116190003_create_organization_memberships_table.sql
+      relativeToChangelogFile: true
 
   # 3. constraints
   - include:
@@ -27,8 +36,20 @@ databaseChangeLog:
   - include:
       file: ../constraints/20261115221448_add_sessions_constraints.sql
       relativeToChangelogFile: true
+  - include:
+      file: ../constraints/20261116190004_add_organizations_constraints.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../constraints/20261116190005_add_workspaces_constraints.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../constraints/20261116190006_add_organization_memberships_constraints.sql
+      relativeToChangelogFile: true
 
   # 4. indexes
   - include:
       file: ../indexes/20261115221449_create_sessions_indexes.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../indexes/20261116190007_create_organizations_indexes.sql
       relativeToChangelogFile: true
