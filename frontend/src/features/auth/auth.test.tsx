@@ -6,6 +6,19 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+/** A fake API where the session exists only after a successful sign-in, as on the real server. */
+function stubSignIn(overrides: object = {}) {
+  let signedIn = false;
+  return stubApi({
+    'GET /api/v1/users/me': () =>
+      signedIn ? Response.json(userDto(overrides)) : unauthenticated(),
+    'POST /api/v1/sessions': () => {
+      signedIn = true;
+      return Response.json(userDto(overrides), { status: 201 });
+    },
+  });
+}
+
 async function signInAs(user: ReturnType<typeof renderRoute>['user'], password = 'admin') {
   await user.type(await screen.findByLabelText('Username'), 'admin');
   await user.type(screen.getByLabelText('Password'), password);
@@ -14,10 +27,7 @@ async function signInAs(user: ReturnType<typeof renderRoute>['user'], password =
 
 describe('sign-in', () => {
   it('sends signed-out visitors to sign-in and back after signing in', async () => {
-    stubApi({
-      'GET /api/v1/users/me': unauthenticated(),
-      'POST /api/v1/sessions': Response.json(userDto(), { status: 201 }),
-    });
+    stubSignIn();
     const { router, user } = renderRoute('/');
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
@@ -32,10 +42,7 @@ describe('sign-in', () => {
   });
 
   it('posts the typed credentials as JSON', async () => {
-    const fetchMock = stubApi({
-      'GET /api/v1/users/me': unauthenticated(),
-      'POST /api/v1/sessions': Response.json(userDto(), { status: 201 }),
-    });
+    const fetchMock = stubSignIn();
     const { user } = renderRoute('/login');
 
     await signInAs(user, 'secret');
@@ -136,12 +143,7 @@ describe('Temporary Password', () => {
   });
 
   it('sends the User to change it right after signing in', async () => {
-    stubApi({
-      'GET /api/v1/users/me': unauthenticated(),
-      'POST /api/v1/sessions': Response.json(userDto({ must_change_password: true }), {
-        status: 201,
-      }),
-    });
+    stubSignIn({ must_change_password: true });
     const { router, user } = renderRoute('/login');
 
     await signInAs(user);
