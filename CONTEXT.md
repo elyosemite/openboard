@@ -131,6 +131,20 @@ _Avoid_: Task Item, Bug Item, checklist item
 The Work Item directly above another in the hierarchy; its counterpart is the **Child**.
 _Avoid_: Container, owner
 
+**Link**:
+A non-hierarchical relation between two Work Items of the same Project, of a fixed kind: Blocks, Duplicates or Relates To.
+_Avoid_: Relation, association, connection
+
+**Blocks**:
+The Link kind meaning one Work Item must be finished before another can proceed; read from the other side as "blocked by".
+_Avoid_: Dependency, depends on
+
+**Duplicates**:
+The Link kind meaning a Work Item reports the same thing as another.
+
+**Relates To**:
+The symmetric Link kind with no rules attached.
+
 ### Lifecycle
 
 **Archived**:
@@ -184,7 +198,10 @@ _Avoid_: Removed, purged
 
 - A **Work Item** belongs to exactly one **Project**
 - The hierarchy is fixed: an **Epic** is the **Parent** of **Features**, a **Feature** of **User Stories**, a **User Story** of **Tasks** and **Bugs**, and a **Task** or **Bug** of **Subtasks**
-- A **Work Item** has at most one **Parent**
+- A **Work Item** has at most one **Parent**; only a **Subtask** must have one (a **Task** or a **Bug**), every other **Work Item Type** can stand alone
+- A **Work Item** can gain, lose or change its **Parent** later, as long as the types respect the hierarchy
+- A **Parent** and its **Child** always belong to the same **Project**
+- A **Link** always connects two **Work Items** of the same **Project**
 
 ### Lifecycle
 
@@ -201,6 +218,8 @@ _Avoid_: Removed, purged
 > **Domain expert:** "That can't happen: removing his **Organization Membership** removed every **Workspace Membership** he had in ACME."
 
 ## Flagged ambiguities
+
+- "dependency" and "blocker" were listed as two relations. Resolved: they are one, **Blocks**, read from opposite sides.
 
 - "Task Item" and "Bug Item" were proposed as two types for the same small step, and both collide with "Work Item". Resolved: a single **Subtask** type, Child of a **Task** or a **Bug**.
 
