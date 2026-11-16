@@ -50,6 +50,10 @@ _Avoid_: Account, login, profile
 The unique identifier of a User within an Instance.
 _Avoid_: Login, handle, user ID
 
+**Temporary Password**:
+A password set by someone else (or by the Instance) that the User must replace at their next sign-in before doing anything else.
+_Avoid_: Initial password, default password, reset password
+
 **Membership**:
 A link that gives a User access at one level and carries the User's role there; always qualified as Organization Membership or Workspace Membership when the level matters.
 _Avoid_: Member, participant, collaborator
@@ -109,6 +113,10 @@ _Avoid_: Removed, purged
 - Only an **Organization Owner** grants **Organization Memberships**, by adding a person's name and **Username**: an existing **User** is linked as is, and an unknown **Username** creates a new **User**
 - A **Workspace Membership** exists only while the same **User** holds an **Organization Membership** in that **Workspace**'s **Organization**; removing the latter removes the former
 - **Organization Owners** can enter every **Workspace** of their **Organization**, open or restricted
+- A new **Instance** with no **Users** creates one **Administrator**, either from the installer's configuration or as `admin` with the **Temporary Password** `admin`
+- Adding an unknown **Username** gives the new **User** a **Temporary Password**, shown once to the **Organization Owner** who added them
+- Only an **Administrator** can give an existing **User** a new **Temporary Password**, because a **User**'s password opens every **Organization** they belong to
+- A **User** signs in with **Username** and password only; external identity providers are not part of the language yet
 - A **Team Assignment** requires that the **User** can enter the **Team**'s **Workspace**; losing that access removes the **Team Assignment**
 
 ### Lifecycle
