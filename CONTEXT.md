@@ -50,6 +50,10 @@ _Avoid_: Account, login, profile
 The unique identifier of a User within an Instance.
 _Avoid_: Login, handle, user ID
 
+**Deactivated**:
+The state of a User who can no longer sign in, while remaining the author of everything they did; only an Administrator deactivates or reactivates a User.
+_Avoid_: Deleted user, disabled, banned
+
 **Temporary Password**:
 A password set by someone else (or by the Instance) that the User must replace at their next sign-in before doing anything else.
 _Avoid_: Initial password, default password, reset password
@@ -105,7 +109,7 @@ _Avoid_: Removed, purged
 
 ### Access
 
-- An **Organization** always has at least one **Organization Owner**: the last one can neither leave nor be removed, and a **User** who is the last **Organization Owner** somewhere cannot be removed from the **Instance**
+- An **Organization** always has at least one **Organization Owner**: the last one can neither leave nor be removed, and a **User** who is the last **Organization Owner** somewhere cannot be **Deactivated**
 - If an **Organization** has no reachable **Organization Owner**, an **Administrator** can appoint one, still without gaining access to its data
 - Each **Instance** decides who can create **Organizations**: only **Administrators**, or any **User**
 - An **Administrator** sees an **Organization**'s data only through an **Organization Membership**, like any other **User**
@@ -116,6 +120,7 @@ _Avoid_: Removed, purged
 - A new **Instance** with no **Users** creates one **Administrator**, either from the installer's configuration or as `admin` with the **Temporary Password** `admin`
 - Adding an unknown **Username** gives the new **User** a **Temporary Password**, shown once to the **Organization Owner** who added them
 - Only an **Administrator** can give an existing **User** a new **Temporary Password**, because a **User**'s password opens every **Organization** they belong to
+- A **Deactivated** **User** keeps their **Memberships** and authorship, but the **Memberships** grant nothing and no new ones can be added until reactivation
 - A **User** signs in with **Username** and password only; external identity providers are not part of the language yet
 - A **Team Assignment** requires that the **User** can enter the **Team**'s **Workspace**; losing that access removes the **Team Assignment**
 
@@ -134,6 +139,8 @@ _Avoid_: Removed, purged
 > **Domain expert:** "That can't happen: removing his **Organization Membership** removed every **Workspace Membership** he had in ACME."
 
 ## Flagged ambiguities
+
+- "removing a user" could mean leaving one Organization or leaving the Instance. Resolved: losing an **Organization Membership** is leaving an **Organization**; being **Deactivated** is leaving the **Instance**. Users are never deleted, so authorship survives.
 
 - "isolated by Organization/Workspace" did not say which one is the tenant. Resolved: the **Organization** is the tenant; a **Workspace** only restricts visibility within it.
 - "members" was used loosely for people in general. Resolved: a **User** is the global identity; access comes from **Memberships**. "Member" is not a domain term.
