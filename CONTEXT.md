@@ -152,6 +152,10 @@ The State of work being done.
 The State of work delivered; discarded work never goes here.
 _Avoid_: Closed, resolved, cancelled
 
+**Era**:
+A time-boxed cycle of one Project, with a start date, an end date and goals, used to plan and track a slice of work.
+_Avoid_: Sprint, cycle, iteration
+
 **Link**:
 A non-hierarchical relation between two Work Items of the same Project, of a fixed kind: Blocks, Duplicates or Relates To.
 _Avoid_: Relation, association, connection
@@ -225,6 +229,8 @@ _Avoid_: Removed, purged
 - A **Link** always connects two **Work Items** of the same **Project**
 - A **Work Item** has at most one **Assignee**, who must be able to enter the **Project**'s **Workspace**; losing that access or being **Deactivated** leaves the **Work Item** without **Assignee**
 - A **Work Item** is always in exactly one **State**, and can move between any two **States**
+- An **Era** belongs to exactly one **Project**, and the **Eras** of a **Project** never overlap in time
+- A **Work Item** is in at most one **Era**, always of its own **Project**
 - Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Subtasks** go with it, its other **Children** lose their **Parent**, and its **Links** disappear
 
 ### Lifecycle
@@ -242,6 +248,8 @@ _Avoid_: Removed, purged
 > **Domain expert:** "That can't happen: removing his **Organization Membership** removed every **Workspace Membership** he had in ACME."
 
 ## Flagged ambiguities
+
+- Eras were described both as "a team's cycles" and as "a project's". Resolved: an **Era** belongs to one **Project**; cross-project views of a Team's work belong to Views and Analytics.
 
 - "status" and "state" were used interchangeably. Resolved: **State** is the term.
 - Abandoned work had no State of its own. Resolved: it returns to **Backlog** or is deleted; **Done** always means delivered, so metrics stay honest.
