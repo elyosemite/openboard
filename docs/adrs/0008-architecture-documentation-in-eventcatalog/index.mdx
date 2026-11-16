@@ -1,0 +1,32 @@
+---
+id: 0008-architecture-documentation-in-eventcatalog
+name: "0008. Architecture documentation lives in EventCatalog"
+version: 1.0.0
+summary: "Architecture documentation, starting with the ADRs, lives in an EventCatalog project in docs/, with telemetry disabled and built in CI."
+owners:
+  - maintainers
+status: accepted
+date: 2026-11-16
+amends:
+  - id: 0001-repository-structure
+  - id: 0002-continuous-integration
+---
+
+## Context
+
+Architecture knowledge was spread across loose Markdown files in `docs/`: ADRs in `docs/adr/`, the OpenAPI contract and the product vision. GitHub renders them one file at a time, with no navigation, no search and no way to relate a decision to the parts of the system it affects. As modules, APIs and, later, domain events are added, readers need one place to discover them.
+
+## Decision
+
+1. `docs/` is an [EventCatalog](https://www.eventcatalog.dev/) project (docs-as-code: folders with `index.mdx` files, built into a static site). It amends ADR 0001, which described `docs/` as plain files.
+2. ADRs are EventCatalog ADR resources in `docs/adrs/NNNN-title/index.mdx`, with `id`, `name`, `version`, `status` and `date` frontmatter. New decisions follow the same layout and keep the sequential number.
+3. Telemetry is disabled (`telemetry: false` in `eventcatalog.config.js`). EventCatalog sends usage telemetry by default, and it is not anonymous: it includes the organization name and catalog statistics. A self-hosted, privacy-minded project should not send it without a deliberate choice.
+4. The OpenAPI contract and the product vision stay where they are for now. Moving them into the catalog is a later step.
+5. CI builds the catalog in a **Docs** job, so a broken page fails the pipeline. This adds a job to the list in ADR 0002.
+
+## Consequences
+
+- Decisions, and later domains, services and messages, can be browsed, searched and linked to each other.
+- `docs/` now has a `package.json` and Node dependencies to keep up to date.
+- EventCatalog v5 is source-available under the Business Source License, free for public open-source projects; the catalog builds without a license key and only shows a trial notice. If OpenBoard's own license or audience ever conflicts with those terms, this decision must be revisited.
+- Opting in to telemetry, or to EventCatalog Cloud features such as the editor, needs a new decision.
