@@ -44,7 +44,8 @@ func run(ctx context.Context, getenv func(string) string, out io.Writer) error {
 	}
 	defer pool.Close()
 
-	if _, err := setupIdentity(ctx, logger, pool, cfg); err != nil {
+	identity, err := setupIdentity(ctx, logger, pool, cfg)
+	if err != nil {
 		return err
 	}
 
@@ -55,7 +56,7 @@ func run(ctx context.Context, getenv func(string) string, out io.Writer) error {
 	}
 
 	srv := &http.Server{
-		Handler:           newRouter(logger, database.Checker{Pool: pool}),
+		Handler:           newRouter(logger, []module{identity}, database.Checker{Pool: pool}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,

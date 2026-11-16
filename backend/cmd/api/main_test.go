@@ -156,12 +156,12 @@ func TestRouterServesProbesAndProblems(t *testing.T) {
 		method, path string
 		status       int
 	}{
-		{newRouter(logger), http.MethodGet, "/healthz", http.StatusOK},
-		{newRouter(logger), http.MethodHead, "/healthz", http.StatusOK},
-		{newRouter(logger), http.MethodGet, "/readyz", http.StatusOK},
-		{newRouter(logger, downChecker{}), http.MethodGet, "/readyz", http.StatusServiceUnavailable},
-		{newRouter(logger), http.MethodPost, "/healthz", http.StatusMethodNotAllowed},
-		{newRouter(logger), http.MethodGet, "/api/v1/unknown", http.StatusNotFound},
+		{newRouter(logger, nil), http.MethodGet, "/healthz", http.StatusOK},
+		{newRouter(logger, nil), http.MethodHead, "/healthz", http.StatusOK},
+		{newRouter(logger, nil), http.MethodGet, "/readyz", http.StatusOK},
+		{newRouter(logger, nil, downChecker{}), http.MethodGet, "/readyz", http.StatusServiceUnavailable},
+		{newRouter(logger, nil), http.MethodPost, "/healthz", http.StatusMethodNotAllowed},
+		{newRouter(logger, nil), http.MethodGet, "/api/v1/unknown", http.StatusNotFound},
 	}
 	for _, tc := range cases {
 		rec := httptest.NewRecorder()

@@ -8,16 +8,25 @@ import (
 	"github.com/elyosemite/openboard/backend/internal/platform/httpx"
 )
 
+// module is a domain module that serves its own routes.
+type module interface {
+	Register(mux *http.ServeMux)
+}
+
 // newRouter wires every route of the API. Operational probes live outside
 // /api/v1 because they are not domain resources; readiness runs checkers.
-func newRouter(logger *slog.Logger, checkers ...health.Checker) http.Handler {
+func newRouter(logger *slog.Logger, modules []module, checkers ...health.Checker) http.Handler {
 	mux := http.NewServeMux()
 
 	probes := health.NewHandler(checkers...)
 	httpx.Route(mux, logger, http.MethodGet, "/healthz", probes.Live)
 	httpx.Route(mux, logger, http.MethodGet, "/readyz", probes.Ready)
 
+	for _, m := range modules {
+		m.Register(mux)
+	}
+
 	mux.Handle("/", httpx.Handle(logger, httpx.NotFound))
 
-	return httpx.AccessLog(logger, httpx.Recover(logger, mux))
+	return httpx.AccessLog(logger, httpx.Recover(logger, httpx.CrossOrigin(logger, mux)))
 }

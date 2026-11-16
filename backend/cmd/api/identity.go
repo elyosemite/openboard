@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/elyosemite/openboard/backend/internal/identity/application"
+	identityhttp "github.com/elyosemite/openboard/backend/internal/identity/http"
 	"github.com/elyosemite/openboard/backend/internal/identity/infrastructure/passwordhash"
 	"github.com/elyosemite/openboard/backend/internal/identity/infrastructure/postgres"
 	"github.com/elyosemite/openboard/backend/internal/identity/infrastructure/throttle"
@@ -22,9 +23,9 @@ const (
 	signInLockout     = 5 * time.Minute
 )
 
-// setupIdentity wires the identity module and creates the first Administrator
-// when the Instance has no Users yet.
-func setupIdentity(ctx context.Context, logger *slog.Logger, pool *pgxpool.Pool, cfg config.Config) (*application.Service, error) {
+// setupIdentity wires the identity module, creates the first Administrator
+// when the Instance has no Users yet and returns its HTTP handler.
+func setupIdentity(ctx context.Context, logger *slog.Logger, pool *pgxpool.Pool, cfg config.Config) (*identityhttp.Handler, error) {
 	svc, err := application.NewService(application.Deps{
 		Users:    postgres.NewUsers(pool),
 		Sessions: postgres.NewSessions(pool),
@@ -43,7 +44,7 @@ func setupIdentity(ctx context.Context, logger *slog.Logger, pool *pgxpool.Pool,
 	if created {
 		logFirstAdministrator(ctx, logger, seed)
 	}
-	return svc, nil
+	return identityhttp.NewHandler(svc, logger, signInLockout), nil
 }
 
 func logFirstAdministrator(ctx context.Context, logger *slog.Logger, seed application.AdministratorSeed) {
