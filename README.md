@@ -59,6 +59,14 @@ docker compose up -d --build
 - Web app: http://localhost:3000
 - API: http://localhost:8080 (`/healthz`, `/readyz`)
 
+Sign in as `admin` with the password `admin`. OpenBoard asks you to choose a new password right away.
+
+> [!WARNING]
+> Before exposing OpenBoard beyond your own machine:
+>
+> - Set `OPENBOARD_ADMIN_USERNAME` and `OPENBOARD_ADMIN_PASSWORD` before the first start, so the first Administrator never has the well-known `admin`/`admin` password.
+> - Serve it over HTTPS. The session cookie is `Secure`, so browsers only send it over HTTPS (plain `http://localhost` is the one exception).
+
 ## Built with
 
 Go · React · TypeScript · PostgreSQL · Liquibase · Docker · GitHub Actions
