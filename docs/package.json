@@ -1,0 +1,17 @@
+{
+  "name": "openboard-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "eventcatalog dev",
+    "build": "eventcatalog build",
+    "start": "eventcatalog start",
+    "preview": "eventcatalog preview",
+    "lint": "eventcatalog-linter"
+  },
+  "dependencies": {
+    "@eventcatalog/core": "5.12.0",
+    "@eventcatalog/linter": "1.3.2"
+  }
+}
