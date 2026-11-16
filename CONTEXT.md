@@ -131,6 +131,23 @@ _Avoid_: Task Item, Bug Item, checklist item
 The Work Item directly above another in the hierarchy; its counterpart is the **Child**.
 _Avoid_: Container, owner
 
+**State**:
+Where a Work Item stands in its life: Backlog, To Do, In Progress or Done.
+_Avoid_: Status, stage, column
+
+**Backlog**:
+The State of work recorded but not committed to; it may never be done, and discarded work returns here.
+
+**To Do**:
+The State of work committed to soon (for example, chosen for the current cycle) but not started.
+
+**In Progress**:
+The State of work being done.
+
+**Done**:
+The State of work delivered; discarded work never goes here.
+_Avoid_: Closed, resolved, cancelled
+
 **Link**:
 A non-hierarchical relation between two Work Items of the same Project, of a fixed kind: Blocks, Duplicates or Relates To.
 _Avoid_: Relation, association, connection
@@ -152,7 +169,7 @@ The state of a Workspace or Project that is hidden from default lists and read-o
 _Avoid_: Closed, inactive, soft-deleted
 
 **Pending Deletion**:
-The state of an Organization, Workspace or Project that someone deleted: invisible and inaccessible to everyone, but restorable until its grace period ends.
+The state of an Organization, Workspace or Project (never a Work Item) that someone deleted: invisible and inaccessible to everyone, but restorable until its grace period ends.
 _Avoid_: Trash, recycle bin, soft-deleted
 
 **Deleted**:
@@ -202,6 +219,8 @@ _Avoid_: Removed, purged
 - A **Work Item** can gain, lose or change its **Parent** later, as long as the types respect the hierarchy
 - A **Parent** and its **Child** always belong to the same **Project**
 - A **Link** always connects two **Work Items** of the same **Project**
+- A **Work Item** is always in exactly one **State**, and can move between any two **States**
+- Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Subtasks** go with it, its other **Children** lose their **Parent**, and its **Links** disappear
 
 ### Lifecycle
 
@@ -218,6 +237,9 @@ _Avoid_: Removed, purged
 > **Domain expert:** "That can't happen: removing his **Organization Membership** removed every **Workspace Membership** he had in ACME."
 
 ## Flagged ambiguities
+
+- "status" and "state" were used interchangeably. Resolved: **State** is the term.
+- Abandoned work had no State of its own. Resolved: it returns to **Backlog** or is deleted; **Done** always means delivered, so metrics stay honest.
 
 - "dependency" and "blocker" were listed as two relations. Resolved: they are one, **Blocks**, read from opposite sides.
 
