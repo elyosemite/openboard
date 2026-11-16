@@ -85,7 +85,7 @@ task --list  # all available tasks
 | `backend/` | Go API (modular monolith) |
 | `frontend/` | React + TypeScript web app |
 | `database/` | Liquibase migrations and the image that applies them |
-| `docs/adr/` | Architecture decision records |
+| `docs/` | Architecture docs ([EventCatalog](https://www.eventcatalog.dev/)): decision records in `docs/adrs/` |
 | `docs/api/openapi.yaml` | API contract |
 | `CONTEXT.md` | Domain glossary |
 

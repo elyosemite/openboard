@@ -3,7 +3,7 @@
 Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês) e `docs/product-vision.pt-BR.md` (português). Leia a seção relevante antes de cada tarefa.
 
 - Use os termos do glossário de domínio em `CONTEXT.md` (código, API, testes, conversas).
-- Papéis dos documentos: `README.md` é a vitrine pública do projeto; este `CLAUDE.md` guarda regras recorrentes; decisões arquiteturais ficam em ADRs (`docs/adr/`); `CONTEXT.md` é só glossário. Não duplique conteúdo entre eles.
+- Papéis dos documentos: `README.md` é a vitrine pública do projeto; este `CLAUDE.md` guarda regras recorrentes; decisões arquiteturais ficam em ADRs (`docs/adrs/`, no EventCatalog); `CONTEXT.md` é só glossário. Não duplique conteúdo entre eles.
 - O `README.md` existe só em inglês. Mantenha as versões em inglês e português da visão do produto sincronizadas.
 
 ## Como trabalhamos
@@ -11,7 +11,7 @@ Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês
 - Entregue em **pequenos incrementos**: uma fatia por vez, que compila, tem testes e pode ser revisada sozinha. Não adiante módulos ou funcionalidades que não foram pedidos.
 - Antes de codar algo não trivial, proponha um plano curto e espere aprovação.
 - Simplicidade antes de abstração: só introduza camada, biblioteca ou serviço com necessidade concreta.
-- Decisões arquiteturais relevantes viram ADR em `docs/adr/NNNN-titulo.md`.
+- Decisões arquiteturais relevantes viram ADR em `docs/adrs/NNNN-titulo/index.mdx` (formato de ADR do EventCatalog, ADR 0008), com `summary` e `owners: [maintainers]`; `pnpm lint` em `docs/` valida.
 
 ## Qualidade de código (obrigatório em todo código escrito ou alterado)
 
