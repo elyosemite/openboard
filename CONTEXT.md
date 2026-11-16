@@ -96,6 +96,41 @@ _Avoid_: Guest, reader, observer
 The link that places a User in a Team; it grants no access.
 _Avoid_: Team Membership, team member
 
+### Work
+
+**Work Item**:
+A unit of work planned, executed and tracked inside one Project; every Work Item has exactly one Work Item Type.
+_Avoid_: Ticket, issue, card, task (as a generic word)
+
+**Work Item Type**:
+The fixed kind of a Work Item: Epic, Feature, User Story, Task, Bug or Subtask.
+_Avoid_: Item kind, category
+
+**Epic**:
+The largest Work Item Type: a broad initiative that groups Features.
+
+**Feature**:
+A product capability that groups User Stories.
+
+**User Story**:
+A piece of value deliverable to a user, small enough for one cycle, that groups Tasks and Bugs.
+_Avoid_: Story, requirement, PBI
+
+**Task**:
+Work needed to deliver a User Story.
+
+**Bug**:
+A defect to be fixed.
+_Avoid_: Defect, issue
+
+**Subtask**:
+A small step inside a Task or a Bug.
+_Avoid_: Task Item, Bug Item, checklist item
+
+**Parent**:
+The Work Item directly above another in the hierarchy; its counterpart is the **Child**.
+_Avoid_: Container, owner
+
 ### Lifecycle
 
 **Archived**:
@@ -145,6 +180,12 @@ _Avoid_: Removed, purged
 - A **User** signs in with **Username** and password only; external identity providers are not part of the language yet
 - A **Team Assignment** requires that the **User** can enter the **Team**'s **Workspace**; losing that access removes the **Team Assignment**
 
+### Work
+
+- A **Work Item** belongs to exactly one **Project**
+- The hierarchy is fixed: an **Epic** is the **Parent** of **Features**, a **Feature** of **User Stories**, a **User Story** of **Tasks** and **Bugs**, and a **Task** or **Bug** of **Subtasks**
+- A **Work Item** has at most one **Parent**
+
 ### Lifecycle
 
 - Archiving a **Workspace** makes all of its **Projects** read-only; restoring it brings them back
@@ -160,6 +201,8 @@ _Avoid_: Removed, purged
 > **Domain expert:** "That can't happen: removing his **Organization Membership** removed every **Workspace Membership** he had in ACME."
 
 ## Flagged ambiguities
+
+- "Task Item" and "Bug Item" were proposed as two types for the same small step, and both collide with "Work Item". Resolved: a single **Subtask** type, Child of a **Task** or a **Bug**.
 
 - "removing a user" could mean leaving one Organization or leaving the Instance. Resolved: losing an **Organization Membership** is leaving an **Organization**; being **Deactivated** is leaving the **Instance**. Users are never deleted, so authorship survives.
 
