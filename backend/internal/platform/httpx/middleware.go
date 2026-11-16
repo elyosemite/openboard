@@ -58,3 +58,13 @@ func (s *statusRecorder) WriteHeader(status int) {
 }
 
 func (s *statusRecorder) Unwrap() http.ResponseWriter { return s.ResponseWriter }
+
+// CrossOrigin rejects cross-origin browser requests with unsafe methods
+// (Sec-Fetch-Site / Origin checks) with a 403 problem.
+func CrossOrigin(logger *slog.Logger, next http.Handler) http.Handler {
+	protection := http.NewCrossOriginProtection()
+	protection.SetDenyHandler(Handle(logger, func(http.ResponseWriter, *http.Request) error {
+		return ErrCrossOrigin()
+	}))
+	return protection.Handler(next)
+}
