@@ -2,6 +2,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -17,7 +18,14 @@ type Config struct {
 	HTTPAddr        string
 	LogLevel        slog.Level
 	ShutdownTimeout time.Duration
+	DatabaseURL     string
+	// AdminUsername and AdminPassword optionally seed the first Administrator.
+	AdminUsername string
+	AdminPassword string
 }
+
+// ErrMissingDatabaseURL reports that OPENBOARD_DATABASE_URL is not set.
+var ErrMissingDatabaseURL = errors.New("OPENBOARD_DATABASE_URL is required")
 
 // Load reads the configuration using getenv (usually os.Getenv), applying
 // defaults for unset variables and rejecting invalid values.
@@ -26,6 +34,12 @@ func Load(getenv func(string) string) (Config, error) {
 		HTTPAddr:        defaultHTTPAddr,
 		LogLevel:        slog.LevelInfo,
 		ShutdownTimeout: defaultShutdownTimeout,
+		DatabaseURL:     getenv("OPENBOARD_DATABASE_URL"),
+		AdminUsername:   getenv("OPENBOARD_ADMIN_USERNAME"),
+		AdminPassword:   getenv("OPENBOARD_ADMIN_PASSWORD"),
+	}
+	if cfg.DatabaseURL == "" {
+		return Config{}, ErrMissingDatabaseURL
 	}
 
 	if raw := getenv("OPENBOARD_HTTP_ADDR"); raw != "" {

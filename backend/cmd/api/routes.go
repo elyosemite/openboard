@@ -9,11 +9,11 @@ import (
 )
 
 // newRouter wires every route of the API. Operational probes live outside
-// /api/v1 because they are not domain resources.
-func newRouter(logger *slog.Logger) http.Handler {
+// /api/v1 because they are not domain resources; readiness runs checkers.
+func newRouter(logger *slog.Logger, checkers ...health.Checker) http.Handler {
 	mux := http.NewServeMux()
 
-	probes := health.NewHandler()
+	probes := health.NewHandler(checkers...)
 	httpx.Route(mux, logger, http.MethodGet, "/healthz", probes.Live)
 	httpx.Route(mux, logger, http.MethodGet, "/readyz", probes.Ready)
 

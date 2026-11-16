@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/elyosemite/openboard/backend/internal/platform/config"
+	"github.com/elyosemite/openboard/backend/internal/platform/database"
 	"github.com/elyosemite/openboard/backend/internal/platform/logging"
 	"github.com/elyosemite/openboard/backend/internal/platform/server"
 )
@@ -37,6 +38,16 @@ func run(ctx context.Context, getenv func(string) string, out io.Writer) error {
 	}
 	logger := logging.New(out, cfg.LogLevel)
 
+	pool, err := database.Open(ctx, cfg.DatabaseURL)
+	if err != nil {
+		return fmt.Errorf("open database: %w", err)
+	}
+	defer pool.Close()
+
+	if _, err := setupIdentity(ctx, logger, pool, cfg); err != nil {
+		return err
+	}
+
 	var lc net.ListenConfig
 	ln, err := lc.Listen(ctx, "tcp", cfg.HTTPAddr)
 	if err != nil {
@@ -44,7 +55,7 @@ func run(ctx context.Context, getenv func(string) string, out io.Writer) error {
 	}
 
 	srv := &http.Server{
-		Handler:           newRouter(logger),
+		Handler:           newRouter(logger, database.Checker{Pool: pool}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,

@@ -1,13 +1,25 @@
 package config
 
 import (
+	"errors"
 	"log/slog"
 	"testing"
 	"time"
 )
 
+const testDatabaseURL = "postgres://u:p@localhost:5432/openboard"
+
+// env returns a getenv with a database URL set unless values overrides it.
 func env(values map[string]string) func(string) string {
-	return func(key string) string { return values[key] }
+	return func(key string) string {
+		if v, ok := values[key]; ok {
+			return v
+		}
+		if key == "OPENBOARD_DATABASE_URL" {
+			return testDatabaseURL
+		}
+		return ""
+	}
 }
 
 func TestLoadDefaults(t *testing.T) {
@@ -24,6 +36,9 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.ShutdownTimeout != 10*time.Second {
 		t.Errorf("ShutdownTimeout = %v, want 10s", cfg.ShutdownTimeout)
 	}
+	if cfg.DatabaseURL != testDatabaseURL || cfg.AdminUsername != "" || cfg.AdminPassword != "" {
+		t.Errorf("unexpected database/admin config: %+v", cfg)
+	}
 }
 
 func TestLoadOverrides(t *testing.T) {
@@ -31,6 +46,8 @@ func TestLoadOverrides(t *testing.T) {
 		"OPENBOARD_HTTP_ADDR":        "127.0.0.1:9090",
 		"OPENBOARD_LOG_LEVEL":        "debug",
 		"OPENBOARD_SHUTDOWN_TIMEOUT": "3s",
+		"OPENBOARD_ADMIN_USERNAME":   "root",
+		"OPENBOARD_ADMIN_PASSWORD":   "a long and fine passphrase",
 	}))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -43,6 +60,15 @@ func TestLoadOverrides(t *testing.T) {
 	}
 	if cfg.ShutdownTimeout != 3*time.Second {
 		t.Errorf("ShutdownTimeout = %v, want 3s", cfg.ShutdownTimeout)
+	}
+	if cfg.AdminUsername != "root" || cfg.AdminPassword != "a long and fine passphrase" {
+		t.Errorf("admin seed not read: %+v", cfg)
+	}
+}
+
+func TestLoadRequiresDatabaseURL(t *testing.T) {
+	if _, err := Load(env(map[string]string{"OPENBOARD_DATABASE_URL": ""})); !errors.Is(err, ErrMissingDatabaseURL) {
+		t.Fatalf("err = %v, want ErrMissingDatabaseURL", err)
 	}
 }
 
