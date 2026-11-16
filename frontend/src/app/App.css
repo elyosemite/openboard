@@ -3,6 +3,10 @@
 }
 
 .app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ob-space-4);
   padding: var(--ob-space-4) var(--ob-space-6);
   background: var(--ob-color-surface);
   border-bottom: 1px solid var(--ob-color-border);

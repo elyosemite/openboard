@@ -1,0 +1,38 @@
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--ob-space-6);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: var(--ob-space-8) var(--ob-space-4);
+}
+
+.auth-page__brand {
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--ob-color-primary);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-4);
+  width: 100%;
+}
+
+.auth-form__hint {
+  margin: calc(-1 * var(--ob-space-2)) 0 0;
+  font-size: 0.875rem;
+}
+
+.current-user {
+  display: flex;
+  align-items: center;
+  gap: var(--ob-space-3);
+}
+
+.current-user__name {
+  color: var(--ob-color-text-muted);
+}

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { problem, stubApi } from '../test/fakeApi';
 import { App } from './App';
 
 afterEach(() => {
@@ -6,12 +7,11 @@ afterEach(() => {
 });
 
 describe('App', () => {
-  it('renders the shell and reports the API as online', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ status: 'ok' })));
+  it('opens on sign-in when there is no session', async () => {
+    stubApi({ 'GET /api/v1/users/me': problem(401, 'unauthenticated', 'Not signed in') });
 
     render(<App />);
 
-    expect(screen.getByRole('heading', { level: 1, name: 'OpenBoard' })).toBeInTheDocument();
-    expect(await screen.findByText('API online')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
   });
 });

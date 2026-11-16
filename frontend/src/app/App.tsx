@@ -1,15 +1,16 @@
-import { SystemStatusPanel } from '../features/system-status';
-import './App.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import { routes } from './routes';
 
 export function App() {
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { retry: 1 } } }),
+  );
+  const [router] = useState(() => createBrowserRouter(routes));
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <h1>OpenBoard</h1>
-      </header>
-      <main className="app-main">
-        <SystemStatusPanel />
-      </main>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }
