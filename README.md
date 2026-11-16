@@ -14,7 +14,7 @@ An open source, self-hosted project management platform for teams that want the 
 
 ## Why OpenBoard?
 
-- **Your data stays yours.** Run it on your own infrastructure with one command. Even the person who administers the installation cannot read your organization's work unless they are given access.
+- **Your data stays yours.** Run it on your own infrastructure with one command, so your work never leaves servers you control.
 - **Self-hosted first, Cloud ready.** The same codebase serves a single team on one server and thousands of organizations in the cloud.
 - **Access you can explain.** Two levels, organization and workspace, and nothing hidden in between. "Why can't she see this project?" has a one-line answer.
 - **Built for engineering teams.** Work items, cycles, boards and docs in one place, with the rigor engineers expect: an OpenAPI contract, tested migrations and strict quality gates.

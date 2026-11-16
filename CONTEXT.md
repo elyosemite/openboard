@@ -69,7 +69,7 @@ The Membership that links a User to one Organization and grants access to it.
 The Membership that links a User to one Workspace, granting entry to it when restricted and a role inside it.
 
 **Administrator**:
-A User who manages the Instance itself (settings, Users, Organizations); the role grants no access to any Organization's data.
+A User who manages the Instance itself (settings, Users, Organizations) and acts as Organization Owner in every Organization.
 _Avoid_: Instance Administrator, superuser, root, sysadmin
 
 **Organization Owner**:
@@ -221,9 +221,9 @@ _Avoid_: Removed, purged
 ### Access
 
 - An **Organization** always has at least one **Organization Owner**: the last one can neither leave nor be removed, and a **User** who is the last **Organization Owner** somewhere cannot be **Deactivated**
-- If an **Organization** has no reachable **Organization Owner**, an **Administrator** can appoint one, still without gaining access to its data
+- If an **Organization** has no reachable **Organization Owner**, an **Administrator** can appoint one
 - Each **Instance** decides who can create **Organizations**: only **Administrators**, or any **User**
-- An **Administrator** sees an **Organization**'s data only through an **Organization Membership**, like any other **User**
+- **Administrators** act as **Organization Owner** in every **Organization** without an **Organization Membership**, and never count toward its **Organization Owners**
 - A **User** can hold **Organization Memberships** in many **Organizations**; each links exactly one **User** to exactly one **Organization**
 - Only an **Organization Owner** grants **Organization Memberships**, by adding a person's name and **Username**: an existing **User** is linked as is, and an unknown **Username** creates a new **User**
 - A **Workspace Membership** exists only while the same **User** holds an **Organization Membership** in that **Workspace**'s **Organization**; removing the latter removes the former
@@ -260,7 +260,7 @@ _Avoid_: Removed, purged
 
 - Archiving a **Workspace** makes all of its **Projects** read-only; restoring it brings them back
 - Deleting puts an **Organization**, **Workspace** or **Project** into **Pending Deletion**; each **Instance** sets the grace period before it becomes **Deleted**
-- An **Organization Owner** can restore what is in **Pending Deletion**; an **Administrator** can restore a whole **Organization** without gaining access to its data
+- An **Organization Owner** can restore what is in **Pending Deletion**; an **Administrator** can restore a whole **Organization**
 
 ## Example dialogue
 

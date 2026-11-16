@@ -1,0 +1,31 @@
+---
+id: 0009-administrator-acts-as-organization-owner
+name: "0009. The Administrator acts as Organization Owner everywhere"
+version: 1.0.0
+summary: "Administrators act as Organization Owner in every Organization without an Organization Membership, replacing the rule that they had no access to Organization data."
+owners:
+  - maintainers
+status: accepted
+date: 2026-11-16
+supersedes:
+  - id: 0004-administrator-has-no-data-access
+---
+
+## Context
+
+ADR 0004 kept the Administrator out of every Organization's data unless given an Organization Membership. That made the Instance-level role awkward: an Administrator creating, restoring or rescuing an Organization could not see what they were managing, and creating an Organization would have needed a separate person to become its Organization Owner.
+
+It also promised more than a self-hosted product can keep: whoever administers the installation can read the database directly, so withholding data in the application protects nothing from them. Azure DevOps gives its organization administrators direct access to every project; Jira lets its administrators grant themselves access to any project. Neither treats the top administrator as unable to reach the data.
+
+## Decision
+
+1. An **Administrator** acts as **Organization Owner** in every **Organization**, without an **Organization Membership**, in the same way an Organization Owner acts as Workspace Owner in every Workspace of their Organization.
+2. Administrators **never count** toward an Organization's Organization Owners: every Organization still needs at least one Organization Owner through an Organization Membership, so it keeps working when the Administrator changes.
+3. Authorization checks treat the Administrator as an Organization Owner of the Organization being accessed. This replaces the "no Administrator bypass" instruction of ADR 0004.
+4. Organizations stay isolated from each other (ADR 0003): this decision is about the Instance-level role, not about data crossing Organizations.
+
+## Consequences
+
+- Creating, restoring and rescuing Organizations work without extra Memberships.
+- Granting the Administrator role is granting access to all data on the Instance; it must go only to people trusted with it.
+- In a Cloud Instance, the operator's Administrators can read every customer's work. Trust in a Cloud offering then rests on who holds that role and on operational safeguards, such as an audit log of Administrator access, which needs its own decision before a Cloud offering exists.
