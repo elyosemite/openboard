@@ -135,6 +135,14 @@ _Avoid_: Container, owner
 The single User responsible for a Work Item; a Work Item may have none.
 _Avoid_: Owner, responsible, assigned users
 
+**Story Points**:
+An optional relative size of a User Story or Bug, with no unit of time.
+_Avoid_: Estimate, effort, points
+
+**Hours**:
+An optional estimate of a Task or Subtask in hours of work.
+_Avoid_: Estimate, effort, time
+
 **State**:
 Where a Work Item stands in its life: Backlog, To Do, In Progress or Done.
 _Avoid_: Status, stage, column
@@ -241,6 +249,7 @@ _Avoid_: Removed, purged
 - An **Era** belongs to exactly one **Project**, and the **Eras** of a **Project** never overlap in time
 - A **Work Item** is in at most one **Era**, always of its own **Project**
 - Someone closes an **Active Era** (it does not end by date alone) and decides, for each unfinished **Work Item**, whether it moves to the next **Era** or leaves **Eras** altogether; its **State** never changes on closing
+- **Story Points** and **Hours** never roll up the hierarchy, and an **Era**'s burndown is shown in one of them at a time, never mixed
 - Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Subtasks** go with it, its other **Children** lose their **Parent**, and its **Links** disappear
 
 ### Lifecycle
@@ -258,6 +267,8 @@ _Avoid_: Removed, purged
 > **Domain expert:** "That can't happen: removing his **Organization Membership** removed every **Workspace Membership** he had in ACME."
 
 ## Flagged ambiguities
+
+- "effort estimate" did not say in which unit. Resolved: **Story Points** on User Stories and Bugs, **Hours** on Tasks and Subtasks, both optional; never call either one just "estimate".
 
 - Eras were described both as "a team's cycles" and as "a project's". Resolved: an **Era** belongs to one **Project**; cross-project views of a Team's work belong to Views and Analytics.
 
