@@ -47,7 +47,21 @@ jobs:
           go install github.com/uudashr/gocognit/cmd/gocognit@v1.3.0
           go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
 
+      # Reuses the "Image (database)" cache, so the JDBC driver is
+      # downloaded only when database/Dockerfile changes.
+      - uses: docker/setup-buildx-action@v4.4.1
+
+      - name: Build migrations image
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: database
+          load: true
+          tags: openboard-migrations:test
+          cache-from: type=gha,scope=database
+
       - name: Quality gates
+        env:
+          OPENBOARD_MIGRATIONS_IMAGE_PREBUILT: "1"
         run: task backend:check
 
       - name: Vulnerability scan

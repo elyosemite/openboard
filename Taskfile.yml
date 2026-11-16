@@ -55,11 +55,18 @@ tasks:
     desc: Tests with coverage profile (backend/coverage.out)
     dir: backend
     cmds:
-      # Integration tests apply the schema with this image; built once here
-      # instead of inside every test process (postgrestest).
-      - docker build -q -t openboard-migrations:test ../database
+      - task: backend:migrations-image
       - go test -coverprofile=coverage.out ./...
       - go tool cover -func=coverage.out
+
+  backend:migrations-image:
+    desc: Build the Liquibase image integration tests apply the schema with
+    # Built once here instead of inside every test process (postgrestest).
+    # CI builds it beforehand from the image cache and sets the variable.
+    status:
+      - test -n "$OPENBOARD_MIGRATIONS_IMAGE_PREBUILT"
+    cmds:
+      - docker build -t openboard-migrations:test database
 
   frontend:install:
     desc: Install frontend dependencies
