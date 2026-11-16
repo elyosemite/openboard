@@ -131,6 +131,10 @@ _Avoid_: Task Item, Bug Item, checklist item
 The Work Item directly above another in the hierarchy; its counterpart is the **Child**.
 _Avoid_: Container, owner
 
+**Assignee**:
+The single User responsible for a Work Item; a Work Item may have none.
+_Avoid_: Owner, responsible, assigned users
+
 **State**:
 Where a Work Item stands in its life: Backlog, To Do, In Progress or Done.
 _Avoid_: Status, stage, column
@@ -219,6 +223,7 @@ _Avoid_: Removed, purged
 - A **Work Item** can gain, lose or change its **Parent** later, as long as the types respect the hierarchy
 - A **Parent** and its **Child** always belong to the same **Project**
 - A **Link** always connects two **Work Items** of the same **Project**
+- A **Work Item** has at most one **Assignee**, who must be able to enter the **Project**'s **Workspace**; losing that access or being **Deactivated** leaves the **Work Item** without **Assignee**
 - A **Work Item** is always in exactly one **State**, and can move between any two **States**
 - Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Subtasks** go with it, its other **Children** lose their **Parent**, and its **Links** disappear
 
