@@ -76,6 +76,22 @@ _Avoid_: Instance Administrator, superuser, root, sysadmin
 The role, held through an Organization Membership, that manages one Organization; never called "administrator".
 _Avoid_: Organization admin, org administrator
 
+**Organization Contributor**:
+The role, held through an Organization Membership, of everyone in an Organization who is not an Organization Owner; it does not manage the Organization.
+_Avoid_: Member, organization user, regular user
+
+**Workspace Owner**:
+The role, held through a Workspace Membership, that manages one Workspace: its Workspace Memberships, Projects, Teams and visibility.
+_Avoid_: Workspace admin, workspace manager
+
+**Workspace Contributor**:
+The role that works inside a Workspace's Projects (creating and editing Work Items) without managing the Workspace.
+_Avoid_: Workspace member, editor
+
+**Workspace Viewer**:
+The read-only role in a Workspace: sees everything in it, changes nothing.
+_Avoid_: Guest, reader, observer
+
 **Team Assignment**:
 The link that places a User in a Team; it grants no access.
 _Avoid_: Team Membership, team member
@@ -117,6 +133,11 @@ _Avoid_: Removed, purged
 - Only an **Organization Owner** grants **Organization Memberships**, by adding a person's name and **Username**: an existing **User** is linked as is, and an unknown **Username** creates a new **User**
 - A **Workspace Membership** exists only while the same **User** holds an **Organization Membership** in that **Workspace**'s **Organization**; removing the latter removes the former
 - **Organization Owners** can enter every **Workspace** of their **Organization**, open or restricted
+- Every **Organization Membership** holds exactly one role: **Organization Owner** or **Organization Contributor**
+- Every **Workspace Membership** holds exactly one role: **Workspace Owner**, **Workspace Contributor** or **Workspace Viewer**
+- **Organization Owners** act as **Workspace Owner** in every **Workspace** of their **Organization** without a **Workspace Membership**
+- A **User** who enters an **Open Workspace** without a **Workspace Membership** acts as **Workspace Contributor**
+- Only **Organization Owners** create **Workspaces**; the creator receives a **Workspace Membership** as **Workspace Owner**
 - A new **Instance** with no **Users** creates one **Administrator**, either from the installer's configuration or as `admin` with the **Temporary Password** `admin`
 - Adding an unknown **Username** gives the new **User** a **Temporary Password**, shown once to the **Organization Owner** who added them
 - Only an **Administrator** can give an existing **User** a new **Temporary Password**, because a **User**'s password opens every **Organization** they belong to
