@@ -10,6 +10,8 @@ export default {
   telemetry: false,
   // 3000 is the web app in docker compose.
   port: 3001,
+  // Listen on IPv4 loopback: the default binds only [::1], which some browsers miss.
+  host: '127.0.0.1',
   output: 'static',
   linkValidation: {
     // Broken internal links fail CI; locally they only warn.
