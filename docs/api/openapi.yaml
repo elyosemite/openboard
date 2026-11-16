@@ -6,12 +6,28 @@ info:
     Authoritative contract of the OpenBoard HTTP API (see api.md).
     Domain resources live under /api/v1. Operational probes live at the root
     because they are not domain resources.
+
+    Authentication uses a server-side session (ADR 0006) carried by the
+    `__Host-openboard_session` cookie, set by `POST /api/v1/sessions`.
+    Requests with a body must be sent as `application/json`, and cross-origin
+    browser requests that change state are rejected with 403.
+
+    While a User has a pending Temporary Password, every authenticated
+    endpoint other than `GET /api/v1/users/me`, `PUT /api/v1/users/me/password`
+    and `DELETE /api/v1/sessions/current` answers 403 with the
+    `password-change-required` problem type.
 servers:
   - url: http://localhost:8080
     description: Local development
+security:
+  - sessionCookie: []
 tags:
   - name: operations
     description: Liveness and readiness probes.
+  - name: sessions
+    description: Signing in and out.
+  - name: users
+    description: The signed-in User.
 paths:
   /healthz:
     get:
@@ -60,8 +76,205 @@ paths:
                 title: Service unavailable
                 status: 503
                 instance: /readyz
+  /api/v1/sessions:
+    post:
+      tags: [sessions]
+      operationId: createSession
+      summary: Sign in
+      description: |
+        Checks a Username and password and starts a session, returned in the
+        session cookie. Every credential failure gives the same 401, so the
+        response never reveals whether a Username exists. After repeated
+        failures the Username is blocked for a few minutes (429).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
+      responses:
+        "201":
+          description: Signed in. The session cookie is set.
+          headers:
+            Set-Cookie:
+              description: The session cookie (HttpOnly, Secure, SameSite=Lax).
+              schema:
+                type: string
+              example: __Host-openboard_session=abc123; Path=/; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax
+            Location:
+              description: The created session.
+              schema:
+                type: string
+              example: /api/v1/sessions/current
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "401":
+          description: Invalid Username or password.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/invalid-credentials
+                title: Invalid username or password
+                status: 401
+                instance: /api/v1/sessions
+        "403":
+          $ref: "#/components/responses/CrossOriginRequest"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "429":
+          description: Too many failed sign-ins for this Username. Try again later.
+          headers:
+            Retry-After:
+              description: Seconds to wait before trying again.
+              schema:
+                type: integer
+              example: 300
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/too-many-attempts
+                title: Too many failed sign-in attempts
+                status: 429
+                instance: /api/v1/sessions
+  /api/v1/sessions/current:
+    delete:
+      tags: [sessions]
+      operationId: deleteCurrentSession
+      summary: Sign out
+      description: |
+        Ends the session behind the cookie and clears it. Succeeds even when
+        the session is already gone.
+      security:
+        - sessionCookie: []
+        - {}
+      responses:
+        "204":
+          description: Signed out. The session cookie is cleared.
+        "403":
+          $ref: "#/components/responses/CrossOriginRequest"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /api/v1/users/me:
+    get:
+      tags: [users]
+      operationId: getCurrentUser
+      summary: Get the signed-in User
+      description: Available while a Temporary Password is pending, so clients can ask for a new one.
+      responses:
+        "200":
+          description: The signed-in User.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /api/v1/users/me/password:
+    put:
+      tags: [users]
+      operationId: replaceCurrentUserPassword
+      summary: Change the signed-in User's password
+      description: |
+        Replaces the password, clears a pending Temporary Password and ends
+        every other session of the User. The new password must have 12 to 128
+        characters and differ from the current password and from the Username.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+      responses:
+        "204":
+          description: Password changed. The current session stays signed in.
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/CrossOriginRequest"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          description: The current password is wrong or the new one breaks the password rules.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/validation-error
+                title: Validation failed
+                status: 422
+                instance: /api/v1/users/me/password
+                errors:
+                  - field: new_password
+                    code: weak
+                    message: use at least 12 characters
 components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-openboard_session
+      description: Opaque session token set by `POST /api/v1/sessions`.
   schemas:
+    SignInRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: gabriel
+        password:
+          type: string
+          format: password
+    ChangePasswordRequest:
+      type: object
+      required: [current_password, new_password]
+      properties:
+        current_password:
+          type: string
+          format: password
+        new_password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+    User:
+      type: object
+      required: [id, username, name, is_administrator, must_change_password]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+          pattern: "^[a-z0-9._-]{3,32}$"
+          example: gabriel
+        name:
+          type: string
+          example: Gabriel Souza
+        is_administrator:
+          type: boolean
+          description: Whether the User is the Instance Administrator.
+        must_change_password:
+          type: boolean
+          description: Whether a Temporary Password is pending.
     HealthStatus:
       type: object
       required: [status]
@@ -90,7 +303,54 @@ components:
         instance:
           type: string
           description: Request path where the problem occurred.
+        errors:
+          type: array
+          description: Field-level details of a validation-error problem.
+          items:
+            $ref: "#/components/schemas/FieldError"
+    FieldError:
+      type: object
+      required: [field, code, message]
+      properties:
+        field:
+          type: string
+          description: Request field the error refers to.
+        code:
+          type: string
+          description: Stable, machine-readable error code.
+        message:
+          type: string
+          description: Human-readable explanation.
   responses:
+    Unauthenticated:
+      description: No valid session. Sign in again.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: https://openboard.dev/problems/unauthenticated
+            title: Not signed in
+            status: 401
+            instance: /api/v1/users/me
+    MalformedRequest:
+      description: The request body is not valid JSON for this operation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    UnsupportedMediaType:
+      description: The request body is not sent as application/json.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    CrossOriginRequest:
+      description: A cross-origin browser request tried to change state.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
     MethodNotAllowed:
       description: The path exists but does not accept this method. See the Allow header.
       headers:
