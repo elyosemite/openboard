@@ -132,6 +132,37 @@ jobs:
       - name: Lint OpenAPI
         run: npx --yes @redocly/cli@2.78.0 lint docs/api/openapi.yaml
 
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    env:
+      # EventCatalog telemetry is not anonymous (ADR 0008).
+      EVENTCATALOG_TELEMETRY_DISABLED: "1"
+      DO_NOT_TRACK: "1"
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: pnpm/action-setup@v6.1.1
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint catalog
+        run: pnpm lint
+
+      - name: Build catalog
+        run: pnpm build
+
   images:
     name: Image (${{ matrix.image }})
     runs-on: ubuntu-latest
