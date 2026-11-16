@@ -1,0 +1,16 @@
+.ob-alert {
+  width: 100%;
+  padding: var(--ob-space-3) var(--ob-space-4);
+  border-radius: var(--ob-radius-sm);
+  font-size: 0.875rem;
+}
+
+.ob-alert--info {
+  color: var(--ob-color-info-fg);
+  background: var(--ob-color-info-bg);
+}
+
+.ob-alert--danger {
+  color: var(--ob-color-danger-fg);
+  background: var(--ob-color-danger-bg);
+}

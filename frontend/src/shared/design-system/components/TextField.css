@@ -1,0 +1,35 @@
+.ob-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ob-space-1);
+  width: 100%;
+}
+
+.ob-field__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ob-field__input {
+  padding: var(--ob-space-2) var(--ob-space-3);
+  font: inherit;
+  color: var(--ob-color-text);
+  background: var(--ob-color-surface);
+  border: 1px solid var(--ob-color-border);
+  border-radius: var(--ob-radius-sm);
+}
+
+.ob-field__input:focus-visible {
+  outline: 2px solid var(--ob-color-primary);
+  outline-offset: 1px;
+}
+
+.ob-field__input[aria-invalid='true'] {
+  border-color: var(--ob-color-danger-fg);
+}
+
+.ob-field__error {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ob-color-danger-fg);
+}
