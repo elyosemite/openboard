@@ -11,9 +11,24 @@
 #   7. views/ and materialized-views/
 #   8. seeds/
 #   9. permissions/
-#
-# Example:
-#   - include:
-#       file: ../tables/20261115103000_create_organizations_table.sql
-#       relativeToChangelogFile: true
-databaseChangeLog: []
+databaseChangeLog:
+  # 2. tables
+  - include:
+      file: ../tables/20261115221445_create_users_table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../tables/20261115221446_create_sessions_table.sql
+      relativeToChangelogFile: true
+
+  # 3. constraints
+  - include:
+      file: ../constraints/20261115221447_add_users_constraints.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../constraints/20261115221448_add_sessions_constraints.sql
+      relativeToChangelogFile: true
+
+  # 4. indexes
+  - include:
+      file: ../indexes/20261115221449_create_sessions_indexes.sql
+      relativeToChangelogFile: true
