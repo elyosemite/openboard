@@ -8,8 +8,6 @@ An open source, self-hosted project management platform for teams that want the 
 
 [![CI](https://github.com/elyosemite/openboard/actions/workflows/ci.yml/badge.svg)](https://github.com/elyosemite/openboard/actions/workflows/ci.yml)
 
-**English** | [Português (Brasil)](README.pt-BR.md)
-
 </div>
 
 ---

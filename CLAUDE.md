@@ -4,7 +4,7 @@ Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês
 
 - Use os termos do glossário de domínio em `CONTEXT.md` (código, API, testes, conversas).
 - Papéis dos documentos: `README.md` é a vitrine pública do projeto; este `CLAUDE.md` guarda regras recorrentes; decisões arquiteturais ficam em ADRs (`docs/adr/`); `CONTEXT.md` é só glossário. Não duplique conteúdo entre eles.
-- Mantenha as versões em inglês e português (README e visão do produto) sincronizadas.
+- O `README.md` existe só em inglês. Mantenha as versões em inglês e português da visão do produto sincronizadas.
 
 ## Como trabalhamos
 
