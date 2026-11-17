@@ -70,7 +70,7 @@ func truncateUsers(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer pool.Close()
-	if _, err := pool.Exec(context.Background(), `TRUNCATE users, sessions CASCADE`); err != nil {
+	if _, err := pool.Exec(context.Background(), `TRUNCATE users, sessions, organizations CASCADE`); err != nil {
 		t.Fatal(err)
 	}
 }

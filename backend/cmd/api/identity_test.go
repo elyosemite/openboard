@@ -37,7 +37,8 @@ func newAPIClient(t *testing.T) *apiClient {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &apiClient{t: t, router: newRouter(logger, []module{identity})}
+	organizations := setupOrganizations(logger, pool, identity)
+	return &apiClient{t: t, router: newRouter(logger, []module{identity, organizations})}
 }
 
 func (c *apiClient) send(method, path, body string) *httptest.ResponseRecorder {

@@ -28,6 +28,8 @@ tags:
     description: Signing in and out.
   - name: users
     description: The signed-in User.
+  - name: organizations
+    description: Organizations, the tenants of the Instance (ADR 0003).
 paths:
   /healthz:
     get:
@@ -225,6 +227,75 @@ paths:
                   - field: new_password
                     code: weak
                     message: use at least 12 characters
+  /api/v1/organizations:
+    post:
+      tags: [organizations]
+      operationId: createOrganization
+      summary: Create an Organization
+      description: |
+        Creates an Organization with its Default Workspace, an Open Workspace
+        named "Default", and gives its first Organization Owner an
+        Organization Membership. The Owner is the creator unless
+        `owner_user_id` names another User. Only Administrators can create
+        Organizations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationRequest"
+      responses:
+        "201":
+          description: Organization created.
+          headers:
+            Location:
+              description: The created Organization.
+              schema:
+                type: string
+              example: /api/v1/organizations/0b5e3c1a-9f2d-4e6b-8a7c-1d2e3f4a5b6c
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          description: |
+            The signed-in User is not an Administrator (`forbidden`), has a
+            pending Temporary Password (`password-change-required`), or the
+            request is cross-origin (`cross-origin-request`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/forbidden
+                title: Not allowed
+                status: 403
+                instance: /api/v1/organizations
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          description: |
+            The name is blank or too long (`name`/`invalid`), or `owner_user_id`
+            is not a UUID (`invalid`) or not a User (`not_found`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/validation-error
+                title: Validation failed
+                status: 422
+                instance: /api/v1/organizations
+                errors:
+                  - field: owner_user_id
+                    code: not_found
+                    message: user not found
 components:
   securitySchemes:
     sessionCookie:
@@ -233,6 +304,33 @@ components:
       name: __Host-openboard_session
       description: Opaque session token set by `POST /api/v1/sessions`.
   schemas:
+    CreateOrganizationRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Trimmed; must not be blank.
+          example: Acme
+        owner_user_id:
+          type: string
+          format: uuid
+          description: The User who becomes the first Organization Owner. Defaults to the creator.
+    Organization:
+      type: object
+      required: [id, name, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Acme
+        created_at:
+          type: string
+          format: date-time
     SignInRequest:
       type: object
       required: [username, password]
