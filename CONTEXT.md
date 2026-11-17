@@ -211,7 +211,7 @@ _Avoid_: Removed, purged
 
 - An **Instance** hosts zero or more **Organizations**
 - A **Workspace** belongs to exactly one **Organization**; an **Organization** always has at least one **Workspace** that is not **Archived**, so its last one can be neither archived nor deleted
-- Every **Organization** is created with its **Default Workspace**, and its creator receives an **Organization Membership** as **Organization Owner**
+- Every **Organization** is created with its **Default Workspace**, and its creator, or a **User** they name instead, receives an **Organization Membership** as **Organization Owner**
 - A **Team** belongs to exactly one **Workspace**
 - A **Project** belongs to exactly one **Workspace**
 - A **Project** has zero or more **Project Teams**, and only **Teams** of the **Project**'s own **Workspace** can be associated with it
