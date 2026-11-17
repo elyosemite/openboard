@@ -82,13 +82,20 @@ func startAndStop(t *testing.T, env func(string) string) string {
 	done := make(chan error, 1)
 	go func() { done <- run(ctx, env, out) }()
 
-	deadline := time.Now().Add(10 * time.Second)
+	// Start-up hashes the first Administrator's password (argon2id), which is
+	// slow when every test package runs at once. The deadline only stops a hung
+	// server from blocking the run; an early exit fails at once with its error.
+	deadline := time.After(60 * time.Second)
 	for !strings.Contains(out.String(), "http server listening") {
-		if time.Now().After(deadline) {
+		select {
+		case err := <-done:
+			cancel()
+			t.Fatalf("run exited before listening: %v: %s", err, out.String())
+		case <-deadline:
 			cancel()
 			t.Fatalf("server did not start: %s", out.String())
+		case <-time.After(10 * time.Millisecond):
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 	cancel()
 	if err := <-done; err != nil {

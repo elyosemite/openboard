@@ -4,15 +4,6 @@ Suggestions recorded to do later. Each entry says what is wrong, why, and the pr
 
 ## Flaky integration tests
 
-### `cmd/api` start-up tests depend on a 10-second deadline
-
-- **Where:** `startAndStop` in `backend/cmd/api/main_test.go`, used by `TestRunStartsCreatesAdministratorOnceAndStops` and `TestRunCreatesAdministratorFromSeed`.
-- **Symptom:** both fail with `server did not start:` and empty output. Seen locally on 2026-11-16, in 1 of 3 runs of `go test ./...`.
-- **Cause:** the test gives `run` 10 seconds of wall-clock time to open the database, create the first Administrator (argon2id, expensive by design) and log `http server listening`. With every test package running in parallel, and Docker Desktop limited to about 4 GB, the machine takes longer. Nothing is broken; start-up is just slow under load.
-- **Proposed fix:** keep the same checks, but stop depending on a short deadline:
-  - fail at once, with the returned error, when `run` exits before logging `http server listening` (today the test waits for the deadline);
-  - raise the deadline from 10 s to 60 s, kept only so a hung server cannot block the run forever.
-
 ### "Database migrations" CI job still downloads the JDBC driver
 
 - **Where:** the `database` job in `.github/workflows/ci.yml` builds `database/Dockerfile` with a plain `docker build`, without cache.
