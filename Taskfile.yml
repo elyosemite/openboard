@@ -83,12 +83,25 @@ tasks:
       - pnpm typecheck
       - pnpm test:coverage
 
+  sonar:up:
+    desc: Start the local SonarQube and wait until it answers UP
+    status:
+      - test "$(docker inspect -f '{{`{{.State.Health.Status}}`}}' openboard-sonarqube 2>/dev/null)" = healthy
+    cmds:
+      - docker compose -f docker-compose.sonar.yml up -d --wait
+
+  sonar:down:
+    desc: Stop the local SonarQube, keeping its data
+    cmds:
+      - docker compose -f docker-compose.sonar.yml stop
+
   sonar:
     desc: Analyze on the local SonarQube (needs OPENBOARD_SONAR_TOKEN)
     preconditions:
       - sh: test -n "$OPENBOARD_SONAR_TOKEN"
         msg: OPENBOARD_SONAR_TOKEN is not set
     cmds:
+      - task: sonar:up
       - task: backend:test
       - pnpm --dir frontend test:coverage
       - >-

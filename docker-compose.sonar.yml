@@ -1,0 +1,28 @@
+# Local SonarQube for development (CLAUDE.md: never a hosted server).
+# Own project so `task down` (docker compose down -v) keeps its data and token.
+# Start with `task sonar:up`, which waits until the server answers UP.
+name: openboard-sonar
+
+services:
+  sonarqube:
+    image: sonarqube:26.11.0.134175-community
+    container_name: openboard-sonarqube
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    # The API answers 404 while starting; the MCP server aborts on that,
+    # so "healthy" means the status endpoint already reports UP.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9000/api/system/status | grep -q '\"status\":\"UP\"'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+volumes:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
