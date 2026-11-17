@@ -21,7 +21,7 @@ Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês
 - Cobertura de código novo **≥ 80%**.
 - Testes **sempre passando**. Nunca desabilite, pule ou afrouxe testes ou regras para fazer passar.
 - Análise com **SonarQube local** via MCP `sonarqube-local` (definido em `.mcp.json`, servidor `http://localhost:9000`). **Proibido** usar SonarQube Cloud ou qualquer conta/servidor SonarQube hospedado — inclusive o MCP `sonarqube` de outros projetos. Se o MCP local estiver indisponível, avise o usuário em vez de dar por concluído.
-- Subir o servidor local: `docker start sonarqube` (criado com `docker run -d --name sonarqube -p 9000:9000 sonarqube:community`).
+- Antes de implementar qualquer coisa, garanta que o servidor local está de pé com `task sonar:up` (`docker-compose.sonar.yml`; só retorna quando a API responde `UP` e não faz nada se já estiver saudável). O MCP aborta se conectar enquanto o SonarQube ainda inicia; se ele não estiver conectado, rode `task sonar:up` e peça ao usuário um `/mcp`.
 
 ## Backend (Go)
 
