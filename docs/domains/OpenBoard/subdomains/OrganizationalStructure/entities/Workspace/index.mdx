@@ -1,0 +1,44 @@
+---
+id: Workspace
+name: Workspace
+version: 0.0.1
+summary: A division inside one Organization that can restrict visibility.
+owners:
+  - maintainers
+identifier: id
+properties:
+  - name: id
+    type: UUID
+    required: true
+    description: Unique identifier of the Workspace.
+  - name: organization_id
+    type: UUID
+    required: true
+    description: The Organization the Workspace belongs to.
+    references: Organization
+    referencesIdentifier: id
+    relationType: belongsTo
+  - name: name
+    type: string
+    required: true
+    description: Display name, never blank.
+  - name: visibility
+    type: string
+    required: true
+    description: Who can enter the Workspace.
+    enum: ['open', 'restricted']
+  - name: created_at
+    type: timestamp
+    required: true
+    description: When the Workspace was created.
+  - name: updated_at
+    type: timestamp
+    required: true
+    description: When the Workspace last changed.
+---
+
+## Overview
+
+Today a Workspace is created only as the Default Workspace of a new Organization.
+
+<EntityPropertiesTable />

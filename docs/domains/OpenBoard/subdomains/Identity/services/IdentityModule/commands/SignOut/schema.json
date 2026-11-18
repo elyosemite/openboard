@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SignOutRequest",
+  "description": "The request has no body: the session comes from the cookie.",
+  "type": "object",
+  "additionalProperties": false
+}

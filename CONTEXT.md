@@ -103,11 +103,11 @@ A unit of work planned, executed and tracked inside one Project; every Work Item
 _Avoid_: Ticket, issue, card, task (as a generic word)
 
 **Work Item Type**:
-The fixed kind of a Work Item: Epic, Feature, User Story, Task, Bug or Subtask.
+A customizable kind of Work Item defined by one Project, such as Epic, Task or Bug.
 _Avoid_: Item kind, category
 
 **Epic**:
-The largest Work Item Type: a broad initiative that groups Features.
+An initial Work Item Type for a broad initiative that groups Features.
 
 **Feature**:
 A product capability that groups User Stories.
@@ -124,7 +124,7 @@ A defect to be fixed.
 _Avoid_: Defect, issue
 
 **Subtask**:
-A small step inside a Task or a Bug.
+An initial Work Item Type for a small step of a Task or a Bug.
 _Avoid_: Task Item, Bug Item, checklist item
 
 **Parent**:
@@ -136,32 +136,52 @@ The single User responsible for a Work Item; a Work Item may have none.
 _Avoid_: Owner, responsible, assigned users
 
 **Story Points**:
-An optional relative size of a User Story or Bug, with no unit of time.
+An optional relative size of a Work Item, with no unit of time.
 _Avoid_: Estimate, effort, points
 
 **Hours**:
-An optional estimate of a Task or Subtask in hours of work.
+An optional estimate of a Work Item in hours of work.
 _Avoid_: Estimate, effort, time
 
 **Priority**:
 How urgent a Work Item is, on a fixed scale: Urgent, High, Medium, Low or No Priority (the default).
 _Avoid_: Severity, importance, rank
 
-**State**:
-Where a Work Item stands in its life: Backlog, To Do, In Progress or Done.
-_Avoid_: Status, stage, column
+**Status**:
+A customizable step of work defined by one Project, such as Backlog, Planning, In Progress, Paused or Done, marking where a Work Item stands.
+_Avoid_: State, stage, column
+
+**Transition Rule**:
+An optional rule of one Project that limits which Statuses a Work Item can move to from a given Status.
+_Avoid_: Workflow rule, guard, constraint
+
+**Status Group**:
+The fixed meaning a Status has for planning and metrics: Not Committed, Planned, Started or Completed.
+_Avoid_: Status category, status type
+
+**Not Committed**:
+The Status Group of work recorded without any commitment to do it.
+
+**Planned**:
+The Status Group of work committed to but not started.
+
+**Started**:
+The Status Group of work already begun and not yet delivered, even while paused.
+
+**Completed**:
+The Status Group of work delivered.
 
 **Backlog**:
-The State of work recorded but not committed to; it may never be done, and discarded work returns here.
+The initial Not Committed Status of a new Project.
 
 **To Do**:
-The State of work committed to soon (for example, chosen for the current cycle) but not started.
+The initial Planned Status of a new Project.
 
 **In Progress**:
-The State of work being done.
+The initial Started Status of a new Project.
 
 **Done**:
-The State of work delivered; discarded work never goes here.
+The initial Completed Status of a new Project.
 _Avoid_: Closed, resolved, cancelled
 
 **Era**:
@@ -176,6 +196,26 @@ The Era in progress; a Project has at most one.
 
 **Completed Era**:
 An Era someone has closed; it keeps a record of what was in it when it ended.
+
+**View**:
+A saved way of showing the Work Items of one Project, with one Layout and its own Filters.
+_Avoid_: Visualization, perspective, screen
+
+**Personal View**:
+A View only the User who created it can see.
+_Avoid_: Private view, my view
+
+**Shared View**:
+A View everyone who can enter its Project can see.
+_Avoid_: Public view, team view
+
+**Layout**:
+The form a View takes: Board, List, Table, Timeline or Calendar.
+_Avoid_: View type, display mode
+
+**Filter**:
+A condition on Work Item properties that selects which Work Items a View shows.
+_Avoid_: Query, search
 
 **Link**:
 A non-hierarchical relation between two Work Items of the same Project, of a fixed kind: Blocks, Duplicates or Relates To.
@@ -243,18 +283,34 @@ _Avoid_: Removed, purged
 ### Work
 
 - A **Work Item** belongs to exactly one **Project**
-- The hierarchy is fixed: an **Epic** is the **Parent** of **Features**, a **Feature** of **User Stories**, a **User Story** of **Tasks** and **Bugs**, and a **Task** or **Bug** of **Subtasks**
-- A **Work Item** has at most one **Parent**; only a **Subtask** must have one (a **Task** or a **Bug**), every other **Work Item Type** can stand alone
-- A **Work Item** can gain, lose or change its **Parent** later, as long as the types respect the hierarchy
+- Each **Project** defines its own **Work Item Types** and which of them can be the **Parent** of which
+- Removing a **Work Item Type** requires choosing another **Work Item Type** of the same **Project** to receive its **Work Items**; any **Parent** pair the **Project** does not allow is undone, and an estimate in another unit is discarded
+- A new **Project** starts with **Epic**, **Feature**, **User Story**, **Task**, **Bug** and **Subtask**, where an **Epic** is the **Parent** of **Features**, a **Feature** of **User Stories**, a **User Story** of **Tasks** and **Bugs**, and a **Task** or **Bug** of **Subtasks**
+- A **Work Item** has at most one **Parent**, and any **Work Item** can stand alone
+- A **Work Item** can gain, lose or change its **Parent** later, as long as its **Project** allows that pair of **Work Item Types**
 - A **Parent** and its **Child** always belong to the same **Project**
 - A **Link** always connects two **Work Items** of the same **Project**
 - A **Work Item** has at most one **Assignee**, who must be able to enter the **Project**'s **Workspace**; losing that access or being **Deactivated** leaves the **Work Item** without **Assignee**
-- A **Work Item** is always in exactly one **State**, and can move between any two **States**
+- Only a **Workspace Owner** changes the **Statuses**, **Transition Rules**, **Work Item Types** and hierarchy of a **Project**
+- A **Workspace Owner** or **Workspace Contributor** can create **Views**; a **Workspace Viewer** only uses them
+- Each **Project** defines its own **Statuses**
+- Every **Status** belongs to exactly one **Status Group**, and the four **Status Groups** are the same in every **Project**
+- A new **Project** starts with **Backlog**, **To Do**, **In Progress** and **Done**, which can be renamed, removed or complemented
+- Removing a **Status** requires choosing another **Status** of the same **Project** to receive its **Work Items**
+- A **Project** always keeps at least one **Not Committed** **Status** and one **Completed** **Status**
+- A **Project** can have many **Views**, and a **View** belongs to exactly one **Project**
+- Every **View** of a **Project** works with the same **Statuses**
+- A **View** can have many **Filters**, which change only what it shows, never the **Work Items**
+- Every **View** starts as a **Personal View**, and its creator can turn it into a **Shared View**
+- Only its creator or a **Workspace Owner** can change a **Shared View**
+- A **Work Item** is always in exactly one **Status** of its **Project**, and can move between any two **Statuses** unless a **Transition Rule** of that **Project** forbids it
+- A new **Project** has no **Transition Rules**
 - An **Era** belongs to exactly one **Project**, and the **Eras** of a **Project** never overlap in time
 - A **Work Item** is in at most one **Era**, always of its own **Project**
-- Someone closes an **Active Era** (it does not end by date alone) and decides, for each unfinished **Work Item**, whether it moves to the next **Era** or leaves **Eras** altogether; its **State** never changes on closing
+- Someone closes an **Active Era** (it does not end by date alone) and decides, for each unfinished **Work Item**, whether it moves to the next **Era** or leaves **Eras** altogether; its **Status** never changes on closing
+- Each **Work Item Type** uses **Story Points**, **Hours** or no estimate; in a new **Project**, **User Stories** and **Bugs** use **Story Points**, **Tasks** and **Subtasks** use **Hours**, and **Epics** and **Features** use no estimate
 - **Story Points** and **Hours** never roll up the hierarchy, and an **Era**'s burndown is shown in one of them at a time, never mixed
-- Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Subtasks** go with it, its other **Children** lose their **Parent**, and its **Links** disappear
+- Deleting a **Work Item** is immediate and final, with no **Pending Deletion**; its **Children**, at any level, are never deleted with it and only lose their **Parent**, and its **Links** disappear
 
 ### Lifecycle
 
@@ -272,12 +328,14 @@ _Avoid_: Removed, purged
 
 ## Flagged ambiguities
 
-- "effort estimate" did not say in which unit. Resolved: **Story Points** on User Stories and Bugs, **Hours** on Tasks and Subtasks, both optional; never call either one just "estimate".
+- "effort estimate" did not say in which unit. Resolved: each **Work Item Type** uses **Story Points**, **Hours** or neither, always optional on the **Work Item**; never call either one just "estimate".
 
-- Eras were described both as "a team's cycles" and as "a project's". Resolved: an **Era** belongs to one **Project**; cross-project views of a Team's work belong to Views and Analytics.
+- Eras were described both as "a team's cycles" and as "a project's". Resolved: an **Era** belongs to one **Project**; a cross-project picture of a Team's work belongs to Analytics, because a **View** shows one **Project**.
 
-- "status" and "state" were used interchangeably. Resolved: **State** is the term.
-- Abandoned work had no State of its own. Resolved: it returns to **Backlog** or is deleted; **Done** always means delivered, so metrics stay honest.
+- "status" and "state" were used interchangeably. Resolved: **Status** is the term.
+- The product vision promised customizable workflows while the glossary listed four fixed Statuses. Resolved: each **Project** defines its own **Statuses**.
+- The product vision promised customizable Work Item types while the glossary listed six fixed ones. Resolved: each **Project** defines its own **Work Item Types** and their hierarchy.
+- Abandoned work had no Status of its own. Resolved: it returns to a **Not Committed** **Status** or is deleted; **Completed** always means delivered, so metrics stay honest.
 
 - "dependency" and "blocker" were listed as two relations. Resolved: they are one, **Blocks**, read from opposite sides.
 

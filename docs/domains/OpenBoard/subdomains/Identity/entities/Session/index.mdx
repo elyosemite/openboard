@@ -1,0 +1,39 @@
+---
+id: Session
+name: Session
+version: 0.0.1
+summary: The server-side record that keeps a User signed in.
+owners:
+  - maintainers
+identifier: id
+properties:
+  - name: id
+    type: bytes
+    required: true
+    description: SHA-256 digest of the cookie token, never the token itself.
+  - name: user_id
+    type: UUID
+    required: true
+    description: The signed-in User.
+    references: User
+    referencesIdentifier: id
+    relationType: belongsTo
+  - name: created_at
+    type: timestamp
+    required: true
+    description: When the session started.
+  - name: last_used_at
+    type: timestamp
+    required: true
+    description: When the session was last used.
+  - name: expires_at
+    type: timestamp
+    required: true
+    description: When the session reaches its maximum lifetime.
+---
+
+## Overview
+
+A session expires 7 days after its last use or 30 days after it started, whichever comes first (ADR 0006).
+
+<EntityPropertiesTable />

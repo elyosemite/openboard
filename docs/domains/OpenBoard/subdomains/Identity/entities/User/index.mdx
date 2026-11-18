@@ -1,0 +1,49 @@
+---
+id: User
+name: User
+version: 0.0.1
+summary: A person's identity and credentials, global to the Instance.
+owners:
+  - maintainers
+identifier: id
+aggregateRoot: true
+properties:
+  - name: id
+    type: UUID
+    required: true
+    description: Unique identifier of the User.
+  - name: username
+    type: string
+    required: true
+    description: Unique in the Instance, lowercase, with 3 to 32 characters.
+  - name: name
+    type: string
+    required: true
+    description: Display name, never blank.
+  - name: password_hash
+    type: string
+    required: true
+    description: Hash of the password, never returned by the API.
+  - name: must_change_password
+    type: boolean
+    required: true
+    description: Whether a Temporary Password is pending.
+  - name: is_administrator
+    type: boolean
+    required: true
+    description: Whether the User is an Administrator.
+  - name: created_at
+    type: timestamp
+    required: true
+    description: When the User was created.
+  - name: updated_at
+    type: timestamp
+    required: true
+    description: When the User last changed.
+---
+
+## Overview
+
+A User exists once per Instance and can hold Organization Memberships in many Organizations.
+
+<EntityPropertiesTable />

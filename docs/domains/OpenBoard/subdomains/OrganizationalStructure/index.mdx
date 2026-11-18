@@ -1,0 +1,30 @@
+---
+id: OrganizationalStructure
+name: Organizational Structure
+version: 0.0.1
+summary: Supporting subdomain that defines the tenant boundary and how an Organization divides its work.
+owners:
+  - maintainers
+services:
+  - id: OrganizationsModule
+entities:
+  - id: Organization
+  - id: Workspace
+  - id: OrganizationMembership
+badges:
+  - content: Supporting subdomain
+    backgroundColor: yellow
+    textColor: yellow
+---
+
+## Overview
+
+The [[entity|Organization]] is the tenant: its data never crosses into another Organization (ADR 0003). A [[entity|Workspace]] divides one Organization and can restrict visibility inside it.
+
+These rules are specific to OpenBoard, but they exist to support the core domain, Work Management. Teams and Projects belong here and have no code yet.
+
+<NodeGraph />
+
+## Entities
+
+<EntityMap />

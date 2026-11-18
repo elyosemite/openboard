@@ -1,60 +1,74 @@
-# OpenBoard — instruções para o Claude
+# OpenBoard: instructions for Claude
 
-Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês) e `docs/product-vision.pt-BR.md` (português). Leia a seção relevante antes de cada tarefa.
+Full product and architecture context: `docs/product-vision.md`. Read the relevant section before each task.
 
-- Use os termos do glossário de domínio em `CONTEXT.md` (código, API, testes, conversas).
-- Papéis dos documentos: `README.md` é a vitrine pública do projeto; este `CLAUDE.md` guarda regras recorrentes; decisões arquiteturais ficam em ADRs (`docs/adrs/`, no EventCatalog); `CONTEXT.md` é só glossário. Não duplique conteúdo entre eles.
-- O `README.md` existe só em inglês. Mantenha as versões em inglês e português da visão do produto sincronizadas.
+- Use the domain glossary terms in `CONTEXT.md` (code, API, tests, conversations).
+- Document roles: `README.md` is the project's public showcase; this `CLAUDE.md` holds recurring rules; architectural decisions live in ADRs (`docs/adrs/`, in EventCatalog); `CONTEXT.md` is only a glossary. Do not duplicate content between them.
+- All repository documentation is written in English only.
 
-## Como trabalhamos
+## How we work
 
-- Entregue em **pequenos incrementos**: uma fatia por vez, que compila, tem testes e pode ser revisada sozinha. Não adiante módulos ou funcionalidades que não foram pedidos.
-- Antes de codar algo não trivial, proponha um plano curto e espere aprovação.
-- Simplicidade antes de abstração: só introduza camada, biblioteca ou serviço com necessidade concreta.
-- Decisões arquiteturais relevantes viram ADR em `docs/adrs/NNNN-titulo/index.mdx` (formato de ADR do EventCatalog, ADR 0008), com `summary` e `owners: [maintainers]`; `pnpm lint` em `docs/` valida.
+- Deliver in **small increments**: one slice at a time that compiles, has tests and can be reviewed on its own. Do not get ahead with modules or features that were not requested.
+- Before coding anything non-trivial, propose a short plan and wait for approval.
+- Simplicity before abstraction: only introduce a layer, library or service when there is a concrete need.
+- Relevant architectural decisions become an ADR in `docs/adrs/NNNN-title/index.mdx` (EventCatalog ADR format, ADR 0008), with `summary` and `owners: [maintainers]`; `pnpm lint` in `docs/` validates them.
 
-## Qualidade de código (obrigatório em todo código escrito ou alterado)
+## Code quality (mandatory for all code written or changed)
 
-- Complexidade ciclomática **≤ 10** por função.
-- Complexidade cognitiva **≤ 15** por função.
-- Aninhamento **≤ 3** níveis.
-- Cobertura de código novo **≥ 80%**.
-- Testes **sempre passando**. Nunca desabilite, pule ou afrouxe testes ou regras para fazer passar.
-- Análise com **SonarQube local** via MCP `sonarqube-local` (definido em `.mcp.json`, servidor `http://localhost:9000`). **Proibido** usar SonarQube Cloud ou qualquer conta/servidor SonarQube hospedado — inclusive o MCP `sonarqube` de outros projetos. Se o MCP local estiver indisponível, avise o usuário em vez de dar por concluído.
-- Antes de implementar qualquer coisa, garanta que o servidor local está de pé com `task sonar:up` (`docker-compose.sonar.yml`; só retorna quando a API responde `UP` e não faz nada se já estiver saudável). O MCP aborta se conectar enquanto o SonarQube ainda inicia; se ele não estiver conectado, rode `task sonar:up` e peça ao usuário um `/mcp`.
+- Cyclomatic complexity **≤ 10** per function.
+- Cognitive complexity **≤ 15** per function.
+- Nesting **≤ 3** levels.
+- New code coverage **≥ 80%**.
+- Tests **always passing**. Never disable, skip or loosen tests or rules to make them pass.
+- Analysis with **local SonarQube** through the `sonarqube-local` MCP (defined in `.mcp.json`, server `http://localhost:9000`). Using SonarQube Cloud or any hosted SonarQube account or server is **forbidden**, including the `sonarqube` MCP from other projects. If the local MCP is unavailable, tell the user instead of considering the work done.
+- Before implementing anything, make sure the local server is up with `task sonar:up` (`docker-compose.sonar.yml`; it only returns when the API answers `UP` and does nothing if already healthy). The MCP aborts if it connects while SonarQube is still starting; if it is not connected, run `task sonar:up` and ask the user to run `/mcp`.
 
 ## Backend (Go)
 
-- Modular Monolith: cada módulo em `internal/<modulo>/` com camadas domínio / aplicação / infraestrutura / http. Um módulo não importa a infraestrutura de outro.
-- Regras de negócio não dependem de PostgreSQL nem de HTTP.
-- Sempre: `context.Context` propagado, erros tratados de forma centralizada, logs estruturados (`log/slog`), configuração por variáveis de ambiente.
-- Toda e qualquer migration é feita com **Liquibase** (nunca ferramenta de migration em Go nem SQL solto aplicado à mão). As migrations são aplicadas pelo pipeline de CD.
-- Autorização sempre validada no backend.
-- A Organization é o tenant (ADR 0003): todo dado de domínio pertence a uma Organization e nunca cruza para outra; Workspace só restringe visibilidade dentro dela.
-- Ferramentas: `gofmt`, `go vet`, `golangci-lint`, `gocyclo -over 10`, `gocognit -over 15`.
+- Modular Monolith: each module in `internal/<module>/` with domain / application / infrastructure / http layers. A module does not import another module's infrastructure.
+- Business rules do not depend on PostgreSQL or HTTP.
+- Always: propagated `context.Context`, centralized error handling, structured logs (`log/slog`), configuration through environment variables.
+- Every migration is made with **Liquibase** (never a Go migration tool or loose SQL applied by hand). Migrations are applied by the CD pipeline.
+- Authorization is always validated on the backend.
+- The Organization is the tenant (ADR 0003): all domain data belongs to one Organization and never crosses into another; a Workspace only restricts visibility within it.
+- Tools: `gofmt`, `go vet`, `golangci-lint`, `gocyclo -over 10`, `gocognit -over 15`.
 
-## Banco de dados
+## Database
 
-- Para o banco de dados você deve consultar as instruções em Database.md
+- For the database, follow the instructions in Database.md.
 
 ## Frontend (React + TypeScript)
 
-- Organizado por funcionalidade (`src/features/<feature>/`), com Design System centralizado.
-- Separar apresentação, estado e comunicação com a API.
-- Ferramentas: ESLint, TypeScript em modo `strict`, Prettier.
+- Organized by feature (`src/features/<feature>/`), with a centralized Design System.
+- Separate presentation, state and API communication.
+- Tools: ESLint, TypeScript in `strict` mode, Prettier.
 
-## Antes de dar uma tarefa por concluída
+## Before considering a task done
 
-1. Backend: `gofmt`, `go vet`, `golangci-lint`, `gocyclo`, `gocognit` e `go test -cover ./...` sem erros.
-2. Frontend: Prettier, ESLint, `tsc --noEmit` e testes com cobertura sem erros.
-3. Análise no SonarQube local (MCP) sem issues novas e com os limites acima atendidos.
-4. Não faça push sem pedido explícito.
+1. Backend: `gofmt`, `go vet`, `golangci-lint`, `gocyclo`, `gocognit` and `go test -cover ./...` without errors.
+2. Frontend: Prettier, ESLint, `tsc --noEmit` and tests with coverage without errors.
+3. Local SonarQube analysis (MCP) with no new issues and the limits above met.
+4. Do not push without an explicit request.
 
 ## Commits
 
-- Faça **commits pequenos**: um commit por passo lógico (uma fatia que compila e passa nos testes), nunca um commit gigante no fim da tarefa.
-- Toda mensagem de commit é gerada com a skill **`caveman-commit`** (Conventional Commits, em inglês).
+- Make **small commits**: one commit per logical step (a slice that compiles and passes the tests), never one giant commit at the end of the task.
+- Every commit message is generated with the **`caveman-commit`** skill (Conventional Commits, in English).
 
-## Como os endopints na API devem ser escritos
+## How API endpoints must be written
 
-Você deve olhar api.md
+Follow api.md.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs live as local markdown in `.scratch/` (outside Git). See `.claude/agent-skills/issue-tracker.md`.
+
+### Triage labels
+
+Five roles with the default names: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human` and `wontfix`. See `.claude/agent-skills/triage-labels.md`.
+
+### Domain docs
+
+Single context: `CONTEXT.md` at the root and ADRs in `docs/adrs/`. See `.claude/agent-skills/domain.md`.

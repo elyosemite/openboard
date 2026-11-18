@@ -1,0 +1,23 @@
+---
+id: SignOut
+name: Sign out
+version: 0.0.1
+summary: Ends the current session and clears its cookie.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: DELETE
+  path: /api/v1/sessions/current
+  statusCodes: ['204', '403', '405']
+---
+
+## Overview
+
+Signing out ends the [[entity|Session]] behind the cookie. It succeeds even when the session is already gone.
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />

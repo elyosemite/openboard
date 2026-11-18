@@ -1,0 +1,29 @@
+---
+id: Identity
+name: Identity
+version: 0.0.1
+summary: Generic subdomain that knows who a User is, through Username and password sign-in and server-side sessions.
+owners:
+  - maintainers
+services:
+  - id: IdentityModule
+entities:
+  - id: User
+  - id: Session
+badges:
+  - content: Generic subdomain
+    backgroundColor: gray
+    textColor: gray
+---
+
+## Overview
+
+Identity answers who is behind a request. A [[entity|User]] is global to the Instance and, alone, grants access to no Organization data.
+
+The problem is well known, so OpenBoard does not seek to differentiate itself here. It is built in-house because a self-hosted Instance cannot depend on an external identity provider.
+
+<NodeGraph />
+
+## Entities
+
+<EntityMap />

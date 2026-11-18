@@ -1,0 +1,65 @@
+---
+id: 0010-work-management-core-and-project-workflows
+name: "0010. Work Management is the core domain, with workflows customized per Project"
+version: 1.0.0
+summary: "Work Management, including the Workflow Engine, is the core domain, and each Project defines its own Statuses, Work Item Types and hierarchy."
+owners:
+  - maintainers
+decisionMakers:
+  - maintainers
+status: accepted
+date: 2026-11-18
+appliesTo:
+  - type: domain
+    id: OpenBoard
+  - type: diagram
+    id: subdomain-map
+amends:
+  - id: 0007-project-is-a-structural-boundary
+related:
+  - id: 0005-teams-do-not-control-access
+---
+
+## Context
+
+OpenBoard needed to know where modeling effort matters most, so its subdomains had to be classified as core, supporting or generic. The product vision also contradicted the glossary: it promised customizable workflows and Work Item types, while the glossary listed four fixed States and six fixed types in a fixed hierarchy.
+
+That contradiction decides the classification. With fixed workflows, the Workflow Engine would not exist. With customizable workflows, it becomes a main reason to choose OpenBoard.
+
+## Decision
+
+### Subdomains
+
+| Type | Subdomains |
+|------|------------|
+| **Core** | Work Management: Work Items, Links, Eras, Modules and the Workflow Engine |
+| **Supporting** | Organizational Structure, Access, Work Insights (Views and Analytics), Knowledge (Pages) and Automations |
+| **Generic** | Identity, Notifications, Audit Logs and Integrations |
+
+### Workflows are customized per Project
+
+1. Each Project defines its own Statuses, Work Item Types and which types can be the Parent of which. A new Project starts with a ready-to-use default set.
+2. Every Status belongs to one of four fixed Status Groups: Not Committed, Planned, Started or Completed. A Project always keeps at least one Not Committed Status and one Completed Status.
+3. Work Items move freely between Statuses unless the Project adds optional Transition Rules.
+4. Each Work Item Type uses Story Points, Hours or no estimate.
+5. No Work Item ever requires a Parent, and deleting a Parent never deletes its Children.
+6. Only a Workspace Owner customizes a Project.
+
+### Views show one Project
+
+A View belongs to exactly one Project, and every View of a Project uses the same Statuses. A cross-project picture of the work belongs to Analytics, which compares Projects through Status Groups. This amends ADR 0007, which said Views could combine Work Items from several Projects.
+
+### Alternatives rejected
+
+- **Customizing per Organization or Workspace:** teams working in different ways would be forced into one shared workflow.
+- **Statuses without Status Groups:** OpenBoard could not tell what counts as started or delivered, so burndown, velocity, lead time and cycle time would not work.
+- **Work Item Types in fixed hierarchy levels:** this would keep rules simpler, but would not let a Project shape its own hierarchy.
+- **Customizing per Team:** a Work Item would have a different Status for each Team, and a Project can have no Teams at all.
+
+## Consequences
+
+- Teams can adapt OpenBoard to how they work without configuring anything before they start.
+- Rules and metrics can never depend on a specific Status or Work Item Type name. They rely on Status Groups and on each Project's configuration.
+- Removing a Status or a Work Item Type requires choosing a replacement for its Work Items.
+- Free hierarchies make reports across Projects harder, because the same type name can mean different things in each Project.
+- Work Management has no code yet, so the core domain is still the largest part of the product left to build.

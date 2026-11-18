@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "User",
+  "type": "object",
+  "required": ["id", "username", "name", "is_administrator", "must_change_password"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "username": { "type": "string", "pattern": "^[a-z0-9._-]{3,32}$" },
+    "name": { "type": "string" },
+    "is_administrator": { "type": "boolean", "description": "Whether the User is the Instance Administrator." },
+    "must_change_password": { "type": "boolean", "description": "Whether a Temporary Password is pending." }
+  }
+}

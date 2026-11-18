@@ -1,7 +1,5 @@
 # OpenBoard: product vision
 
-**English** | [Português (Brasil)](product-vision.pt-BR.md)
-
 ## 1. Overview
 
 **OpenBoard** will be an open source project management and work tracking platform, inspired by established tools such as Azure DevOps Boards, Jira and Plane.
@@ -52,7 +50,7 @@ A rich text editor lets users document requirements, record technical decisions,
 
 Work Items can also be related to each other through dependencies, blockers, related items, subtasks and work hierarchies.
 
-Work Item types may include Epics, Features, Tasks, Bugs and Subtasks, customizable to each organization's needs.
+Each Project defines its own Work Item types and which of them can be the parent of which. A new Project starts with Epics, Features, User Stories, Tasks, Bugs and Subtasks.
 
 ### 3.2. Eras
 
@@ -80,14 +78,15 @@ Views offer different ways to visualize and organize Work Items.
 
 Views may include:
 
-- List View: tabular organization of items.
+- List View: compact list of items.
+- Table View: spreadsheet-style table of item properties.
 - Board View: Kanban board organized by status.
 - Calendar View: tracking of deadlines and dates.
 - Timeline View: time-based view of activities and dependencies.
 
 Users can create custom filters using properties such as assignee, priority, status, module, Era, labels and dates.
 
-Views can be saved, shared with the team and reused.
+Each View belongs to one Project. A View starts as personal and can be shared with everyone in the Project.
 
 ### 3.5. Pages
 
@@ -117,43 +116,45 @@ Planned indicators include:
 
 The goal is to make bottlenecks easier to spot, help understand team capacity and support data-driven decisions.
 
+### 3.7. Workflow Engine
+
+Defines and runs Work Item workflows, and is part of the core domain.
+
+Each Project defines its own statuses. Every status belongs to a fixed group (Not Committed, Planned, Started or Completed), so metrics stay comparable across Projects.
+
+Work Items can move freely between statuses, unless the Project adds optional transition rules.
+
 ## 4. Supporting subdomains and functional infrastructure
 
 Beyond the subdomains directly tied to organizing and executing work, OpenBoard will have cross-cutting capabilities that keep the platform running.
 
 These subdomains will be built progressively.
 
-### 4.1. Workflow Engine
-
-Defines and runs Work Item workflows.
-
-It will allow configuring states, transitions, rules and constraints, so each organization can adapt its operational processes.
-
-### 4.2. Automations
+### 4.1. Automations
 
 An automation system based on events and conditions.
 
 It will run actions automatically when certain things happen, such as status changes, assignments, due dates and Work Item creation.
 
-### 4.3. Integrations
+### 4.2. Integrations
 
 The layer responsible for integrating with external tools and services.
 
 It may offer integrations with GitHub, GitLab, Bitbucket, Slack, Microsoft Teams and other platforms teams use.
 
-### 4.4. RBAC
+### 4.3. RBAC
 
 Role-Based Access Control.
 
 It manages permissions and controls which resources and operations are available to each user within an Organization, Workspace, Team or Project.
 
-### 4.5. Audit Logs
+### 4.4. Audit Logs
 
 An audit system that records relevant events and changes within the platform.
 
 It will make it possible to trace operations, identify who made changes and browse activity history.
 
-### 4.6. Notifications
+### 4.5. Notifications
 
 A notification system that informs users about relevant events.
 

@@ -24,3 +24,6 @@ frontend/coverage/
 
 # SonarQube scanner
 .scannerwork/
+
+# Local issue tracker
+.scratch/

@@ -1,0 +1,38 @@
+---
+id: OrganizationMembership
+name: Organization Membership
+version: 0.0.1
+summary: The link that gives one User access to one Organization and carries the User's role there.
+owners:
+  - maintainers
+properties:
+  - name: organization_id
+    type: UUID
+    required: true
+    description: The Organization the User has access to.
+    references: Organization
+    referencesIdentifier: id
+    relationType: belongsTo
+  - name: user_id
+    type: UUID
+    required: true
+    description: The User who holds the Organization Membership.
+    references: User
+    referencesIdentifier: id
+    relationType: belongsTo
+  - name: role
+    type: string
+    required: true
+    description: Organization Owner or Organization Contributor.
+    enum: ['owner', 'contributor']
+  - name: created_at
+    type: timestamp
+    required: true
+    description: When the Organization Membership was granted.
+---
+
+## Overview
+
+A User holds at most one Organization Membership in each Organization.
+
+<EntityPropertiesTable />

@@ -1,0 +1,31 @@
+---
+id: openboard-db
+name: OpenBoard Database
+version: 0.0.1
+summary: PostgreSQL system of record shared by the backend modules, with every table migrated by Liquibase.
+owners:
+  - maintainers
+container_type: database
+technology: postgres@18
+authoritative: true
+access_mode: readWrite
+classification: confidential
+---
+
+<NodeGraph />
+
+## What does it store?
+
+| Table | Owning module |
+|-------|---------------|
+| `users` | [[service\|IdentityModule]] |
+| `sessions` | [[service\|IdentityModule]] |
+| `organizations` | [[service\|OrganizationsModule]] |
+| `workspaces` | [[service\|OrganizationsModule]] |
+| `organization_memberships` | [[service\|OrganizationsModule]] |
+
+## Access rules
+
+- Each table is read and written only by its owning module.
+- Schema changes are made only through the Liquibase migrations in `database/migrations`.
+- The database is classified as confidential because it holds password hashes and session digests.

@@ -1,0 +1,43 @@
+---
+id: IdentityModule
+name: Identity Module
+version: 0.0.1
+summary: Backend module that signs Users in and out, keeps their server-side sessions and manages their passwords.
+owners:
+  - maintainers
+receives:
+  - id: SignIn
+  - id: SignOut
+  - id: ChangePassword
+  - id: GetCurrentUser
+readsFrom:
+  - id: openboard-db
+writesTo:
+  - id: openboard-db
+entities:
+  - id: User
+  - id: Session
+badges:
+  - content: Module
+    backgroundColor: blue
+    textColor: blue
+repository:
+  language: Go
+  url: https://github.com/elyosemite/openboard/tree/main/backend/internal/identity
+---
+
+## Overview
+
+The Identity Module is part of the single backend deployable of [[system|OpenBoardPlatform]]. It owns the `users` and `sessions` tables in [[container|openboard-db]].
+
+<NodeGraph />
+
+<MessageTable format="all" />
+
+## Rules
+
+- Passwords are stored as Argon2id hashes.
+- A session ends after 7 days without use or 30 days after it started (ADR 0006).
+- While a Temporary Password is pending, the User can only read their own data, change the password or sign out.
+
+The HTTP contract is in the [OpenAPI document](https://github.com/elyosemite/openboard/blob/main/docs/api/openapi.yaml).

@@ -1,0 +1,23 @@
+---
+id: CreateOrganization
+name: Create Organization
+version: 0.0.1
+summary: Creates an Organization with its Default Workspace and gives its first Organization Owner an Organization Membership.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: POST
+  path: /api/v1/organizations
+  statusCodes: ['201', '400', '401', '403', '405', '415', '422']
+---
+
+## Overview
+
+Only Administrators can create an [[entity|Organization]]. The first Organization Owner is the creator, unless the request names another User.
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />

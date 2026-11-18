@@ -1,0 +1,36 @@
+---
+id: OpenBoard
+name: OpenBoard
+version: 0.0.1
+summary: Open source, self-hosted project management platform where Organizations plan, execute and track their work.
+owners:
+  - maintainers
+domains:
+  - id: Identity
+  - id: OrganizationalStructure
+systems:
+  - id: OpenBoardPlatform
+diagrams:
+  - id: subdomain-map
+repository:
+  language: Go
+  url: https://github.com/elyosemite/openboard
+---
+
+## Overview
+
+OpenBoard is organized by Domain-Driven Design subdomains. This catalog documents the subdomains that already have code, and [[diagram|subdomain-map]] shows the complete classification, including what is still planned.
+
+| Subdomain | Type | Status |
+|-----------|------|--------|
+| Work Management | Core | Planned |
+| [[domain\|OrganizationalStructure]] | Supporting | Implemented in part |
+| [[domain\|Identity]] | Generic | Implemented in part |
+
+Work Management is the core domain: it is the reason the product exists, and it has no code yet.
+
+## Architecture
+
+The subdomains run inside [[system|OpenBoardPlatform]], a Modular Monolith with a single backend deployable.
+
+<NodeGraph mode="full" />

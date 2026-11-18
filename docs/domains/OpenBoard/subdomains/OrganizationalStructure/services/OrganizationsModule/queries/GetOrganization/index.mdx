@@ -1,0 +1,23 @@
+---
+id: GetOrganization
+name: Get Organization
+version: 0.0.1
+summary: Returns one Organization the signed-in User can see.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: GET
+  path: /api/v1/organizations/{organization_id}
+  statusCodes: ['200', '401', '403', '404', '405']
+---
+
+## Overview
+
+An [[entity|Organization]] that does not exist and one the User cannot see both answer 404, so the response never reveals another tenant's data (ADR 0003).
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />

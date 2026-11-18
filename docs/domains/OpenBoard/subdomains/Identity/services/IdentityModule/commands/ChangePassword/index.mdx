@@ -1,0 +1,23 @@
+---
+id: ChangePassword
+name: Change password
+version: 0.0.1
+summary: Replaces the signed-in User's password, clears a pending Temporary Password and ends the User's other sessions.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: PUT
+  path: /api/v1/users/me/password
+  statusCodes: ['204', '400', '401', '403', '405', '415', '422']
+---
+
+## Overview
+
+The new password must have 12 to 128 characters and differ from the current password and from the Username. The current session stays signed in.
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />
