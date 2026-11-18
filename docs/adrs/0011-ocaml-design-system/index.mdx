@@ -1,0 +1,45 @@
+---
+id: 0011-ocaml-design-system
+name: "0011. The interface is built only with the OCaml Design System"
+version: 1.0.0
+summary: "Every OpenBoard screen uses the tokens, components, icons and fonts of the OCaml Design System, pinned to a release, and keeps no visual language of its own."
+owners:
+  - maintainers
+decisionMakers:
+  - maintainers
+status: accepted
+date: 2026-11-18
+appliesTo:
+  - type: service
+    id: WebApp
+---
+
+## Context
+
+The frontend started with a small design system of its own in `src/shared/design-system`: its own `--ob-*` tokens and five components. Work Management will add dense screens such as boards, tables and timelines, which would need many more components, themes and accessibility work.
+
+The maintainers already keep the [OCaml Design System](https://github.com/elyosemite/ocaml-design-system), built for dense screens and targeting WCAG 2.2 AA. It ships semantic tokens, CSS components, icons and fonts, with light, dark and high-contrast themes. Keeping a second visual language in OpenBoard would duplicate that work and let the two drift apart.
+
+## Decision
+
+1. The OCaml Design System is the only source of tokens, components, icons and fonts for the OpenBoard interface.
+2. The frontend depends on it as a package pinned to a release tag. Moving to a new release is a deliberate change.
+3. Styles use **semantic tokens** only. Hexadecimal or functional colors, `--palette-*` primitives and tokens defined by OpenBoard are forbidden.
+4. `src/shared/design-system` holds only thin React components that render the design system's classes and add behavior and accessibility. They carry no styles of their own.
+5. Feature CSS is limited to arranging a screen, and uses tokens for every value the design system defines.
+6. When a token or component is missing, it is proposed to the OCaml Design System first, following its contribution process. OpenBoard does not build a local substitute.
+7. An automated frontend test fails when source code breaks rule 3.
+
+### Alternatives rejected
+
+- **Keeping OpenBoard's own design system:** it would repeat the theming and accessibility work the OCaml Design System already does.
+- **Copying the CSS into this repository:** copies drift, and fixes would stop reaching OpenBoard.
+- **Adopting a third-party component library:** it would bring a second visual language alongside the one the maintainers already own.
+
+## Consequences
+
+- Screens look consistent and gain light, dark and high-contrast themes without extra work.
+- Fonts and icons are served by OpenBoard itself, so a self-hosted Instance needs no external service at runtime.
+- Features can wait on the design system when a component is missing.
+- The package is installed from GitHub and builds during installation, so `pnpm-workspace.yaml` must allow its build script and image builds need access to GitHub.
+- The OCaml Design System has no license yet. It needs an open source license compatible with OpenBoard before OpenBoard is distributed with it.
