@@ -68,7 +68,7 @@ Um editor de texto rico permitirá documentar requisitos, registrar decisões t�
 
 Também será possível estabelecer relações entre diferentes Work Items, como dependências, bloqueios, itens relacionados, subtarefas e hierarquias de trabalho.
 
-Tipos de Work Items poderão incluir Epics, Features, Tasks, Bugs e Subtasks, com possibilidade de personalização conforme as necessidades de cada organização.
+Cada projeto definirá seus próprios tipos de Work Items e quais deles podem ser pais de quais. Um novo projeto começará com Epics, Features, User Stories, Tasks, Bugs e Subtasks.
 
 ### 3.2. Eras
 
@@ -96,14 +96,15 @@ Views oferecerão diferentes formas de visualizar e organizar os Work Items.
 
 As visualizações poderão incluir:
 
-- List View: organização tabular dos itens.
+- List View: lista compacta dos itens.
+- Table View: tabela das propriedades dos itens, no estilo de uma planilha.
 - Board View: visualização Kanban organizada por status.
 - Calendar View: acompanhamento de prazos e datas.
 - Timeline View: visualização temporal das atividades e dependências.
 
 Os usuários poderão criar filtros personalizados utilizando propriedades como responsável, prioridade, status, módulo, Era, labels e datas.
 
-As Views poderão ser salvas, compartilhadas com a equipe e reutilizadas.
+Cada View pertencerá a um único projeto. Uma View começará como pessoal e poderá ser compartilhada com todas as pessoas do projeto.
 
 ### 3.5. Pages
 
@@ -133,43 +134,45 @@ Entre os indicadores previstos estão:
 
 O objetivo será facilitar a identificação de gargalos, compreender a capacidade operacional das equipes e apoiar decisões baseadas em dados.
 
+### 3.7. Workflow Engine
+
+Mecanismo responsável por definir e executar os fluxos de trabalho dos Work Items, parte do domínio central.
+
+Cada projeto definirá seus próprios status. Todo status pertencerá a um grupo fixo (Not Committed, Planned, Started ou Completed), para que as métricas continuem comparáveis entre projetos.
+
+Os Work Items poderão passar livremente de um status para outro, a menos que o projeto adicione regras de transição opcionais.
+
 ## 4. Subdomínios de suporte e infraestrutura funcional
 
 Além dos subdomínios diretamente relacionados à organização e execução do trabalho, o OpenBoard contará com capacidades transversais responsáveis por sustentar a operação da plataforma.
 
 Esses subdomínios serão desenvolvidos progressivamente.
 
-### 4.1. Workflow Engine
-
-Mecanismo responsável por definir e executar os fluxos de trabalho dos Work Items.
-
-Permitirá configurar estados, transições, regras e restrições, possibilitando que cada organização adapte seus processos operacionais.
-
-### 4.2. Automations
+### 4.1. Automations
 
 Sistema de automações baseado em eventos e condições.
 
 Permitirá executar ações automaticamente a partir de determinados acontecimentos, como alterações de status, atribuições, vencimentos e criação de Work Items.
 
-### 4.3. Integrations
+### 4.2. Integrations
 
 Camada responsável pela integração com ferramentas e serviços externos.
 
 Poderá oferecer integrações com GitHub, GitLab, Bitbucket, Slack, Microsoft Teams e outras plataformas utilizadas pelas equipes.
 
-### 4.4. RBAC
+### 4.3. RBAC
 
 Sistema de controle de acesso baseado em papéis (*Role-Based Access Control*).
 
 Será responsável por gerenciar permissões e controlar quais recursos e operações estarão disponíveis para cada usuário dentro de uma Organization, Workspace, Team ou Project.
 
-### 4.5. Audit Logs
+### 4.4. Audit Logs
 
 Sistema de auditoria responsável por registrar eventos e alterações relevantes dentro da plataforma.
 
 Permitirá rastrear operações, identificar responsáveis por alterações e consultar o histórico de atividades.
 
-### 4.6. Notifications
+### 4.5. Notifications
 
 Sistema de notificações responsável por informar os usuários sobre acontecimentos relevantes.
 
