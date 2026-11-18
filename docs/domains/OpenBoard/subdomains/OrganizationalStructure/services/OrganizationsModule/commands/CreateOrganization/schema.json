@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CreateOrganizationRequest",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1, "maxLength": 255, "description": "Trimmed; must not be blank." },
+    "owner_user_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The User who becomes the first Organization Owner. Defaults to the creator."
+    }
+  }
+}

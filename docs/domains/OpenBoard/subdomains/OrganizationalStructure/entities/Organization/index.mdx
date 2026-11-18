@@ -1,0 +1,33 @@
+---
+id: Organization
+name: Organization
+version: 0.0.1
+summary: The tenant, the outermost boundary of data, administration and access.
+owners:
+  - maintainers
+identifier: id
+aggregateRoot: true
+properties:
+  - name: id
+    type: UUID
+    required: true
+    description: Unique identifier of the Organization.
+  - name: name
+    type: string
+    required: true
+    description: Display name with 1 to 255 characters, never blank.
+  - name: created_at
+    type: timestamp
+    required: true
+    description: When the Organization was created.
+  - name: updated_at
+    type: timestamp
+    required: true
+    description: When the Organization last changed.
+---
+
+## Overview
+
+Every Organization is created with its Default Workspace and a first Organization Owner, in one transaction.
+
+<EntityPropertiesTable />

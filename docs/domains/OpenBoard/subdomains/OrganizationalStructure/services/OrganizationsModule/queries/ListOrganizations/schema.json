@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrganizationPage",
+  "type": "object",
+  "required": ["items", "page", "page_size", "total_items", "total_pages"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "created_at"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "page": { "type": "integer" },
+    "page_size": { "type": "integer" },
+    "total_items": { "type": "integer" },
+    "total_pages": { "type": "integer" }
+  }
+}

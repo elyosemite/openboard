@@ -1,0 +1,45 @@
+---
+id: OrganizationsModule
+name: Organizations Module
+version: 0.0.1
+summary: Backend module that creates Organizations with their Default Workspace and first Organization Owner, and lists those a User can see.
+owners:
+  - maintainers
+receives:
+  - id: CreateOrganization
+  - id: ListOrganizations
+  - id: GetOrganization
+readsFrom:
+  - id: openboard-db
+writesTo:
+  - id: openboard-db
+entities:
+  - id: Organization
+  - id: Workspace
+  - id: OrganizationMembership
+badges:
+  - content: Module
+    backgroundColor: blue
+    textColor: blue
+repository:
+  language: Go
+  url: https://github.com/elyosemite/openboard/tree/main/backend/internal/organizations
+---
+
+## Overview
+
+The Organizations Module is part of the single backend deployable of [[system|OpenBoardPlatform]]. It owns the `organizations`, `workspaces` and `organization_memberships` tables in [[container|openboard-db]].
+
+Authentication comes from [[service|IdentityModule]], injected when the application starts, so neither module imports the other.
+
+<NodeGraph />
+
+<MessageTable format="all" />
+
+## Rules
+
+- Only Administrators create Organizations.
+- Administrators see every Organization (ADR 0009); other Users see only those they hold an Organization Membership in.
+- An Organization the User cannot see answers as if it did not exist (ADR 0003).
+
+The HTTP contract is in the [OpenAPI document](https://github.com/elyosemite/openboard/blob/main/docs/api/openapi.yaml).

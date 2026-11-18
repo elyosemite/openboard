@@ -1,0 +1,23 @@
+---
+id: ListOrganizations
+name: List Organizations
+version: 0.0.1
+summary: Returns one page of the Organizations the signed-in User can see, ordered by name.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: GET
+  path: /api/v1/organizations
+  statusCodes: ['200', '401', '403', '405', '422']
+---
+
+## Overview
+
+An Administrator sees every [[entity|Organization]]. Any other User sees those they hold an Organization Membership in.
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />
