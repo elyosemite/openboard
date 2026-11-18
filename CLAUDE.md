@@ -58,3 +58,17 @@ Contexto completo do produto e da arquitetura: `docs/product-vision.md` (inglês
 ## Como os endopints na API devem ser escritos
 
 Você deve olhar api.md
+
+## Agent skills
+
+### Issue tracker
+
+Issues e PRDs ficam em markdown local, em `.scratch/` (fora do Git). Veja `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Cinco papéis com os nomes padrão: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human` e `wontfix`. Veja `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Contexto único: `CONTEXT.md` na raiz e ADRs em `docs/adrs/`. Veja `docs/agents/domain.md`.
