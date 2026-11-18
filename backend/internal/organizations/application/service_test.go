@@ -18,6 +18,20 @@ var administrator = domain.Actor{UserID: adminID, IsAdministrator: true}
 type fakeRepository struct {
 	created []NewOrganization
 	err     error
+	foundID domain.OrganizationID
+	scope   Scope
+	page    PageRequest
+	total   int
+}
+
+func (f *fakeRepository) Find(_ context.Context, id domain.OrganizationID, scope Scope) (domain.Organization, error) {
+	f.foundID, f.scope = id, scope
+	return domain.Organization{ID: id, Name: "Acme"}, f.err
+}
+
+func (f *fakeRepository) List(_ context.Context, scope Scope, page PageRequest) ([]domain.Organization, int, error) {
+	f.scope, f.page = scope, page
+	return []domain.Organization{{ID: acmeID, Name: "Acme"}}, f.total, f.err
 }
 
 func (f *fakeRepository) Create(_ context.Context, org NewOrganization) (domain.Organization, error) {

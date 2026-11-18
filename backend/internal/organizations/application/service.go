@@ -23,6 +23,28 @@ type OrganizationRepository interface {
 	// Owner's Organization Membership atomically. It returns
 	// domain.ErrOwnerNotFound when OwnerID is not a User.
 	Create(ctx context.Context, org NewOrganization) (domain.Organization, error)
+	// Find returns the Organization with id if scope sees it, or domain.ErrNotFound.
+	Find(ctx context.Context, id domain.OrganizationID, scope Scope) (domain.Organization, error)
+	// List returns one page of the Organizations scope sees, ordered by
+	// name ignoring case, and how many it sees in total.
+	List(ctx context.Context, scope Scope, page PageRequest) ([]domain.Organization, int, error)
+}
+
+// Scope limits which Organizations a query returns: every one, or only those
+// UserID holds an Organization Membership in.
+type Scope struct {
+	UserID domain.UserID
+	All    bool
+}
+
+func scopeOf(actor domain.Actor) Scope {
+	return Scope{UserID: actor.UserID, All: actor.SeesAllOrganizations()}
+}
+
+// PageRequest selects a page of a collection.
+type PageRequest struct {
+	Limit  int
+	Offset int
 }
 
 // CreateOrganizationInput is the raw request to create an Organization.

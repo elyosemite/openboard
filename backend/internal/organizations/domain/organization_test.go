@@ -44,3 +44,19 @@ func TestOnlyAdministratorsCreateOrganizations(t *testing.T) {
 		t.Error("a User who is not an Administrator must not create Organizations")
 	}
 }
+
+func TestParseOrganizationID(t *testing.T) {
+	got, err := ParseOrganizationID("0B5E3C1A-9F2D-4E6B-8A7C-1D2E3F4A5B6C")
+	if err != nil || got != "0b5e3c1a-9f2d-4e6b-8a7c-1d2e3f4a5b6c" {
+		t.Errorf("ParseOrganizationID = %q, %v; want lowercase UUID", got, err)
+	}
+	if _, err := ParseOrganizationID("acme"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("err = %v, want ErrNotFound", err)
+	}
+}
+
+func TestOnlyAdministratorsSeeAllOrganizations(t *testing.T) {
+	if !(Actor{IsAdministrator: true}).SeesAllOrganizations() || (Actor{}).SeesAllOrganizations() {
+		t.Error("only Administrators see every Organization")
+	}
+}

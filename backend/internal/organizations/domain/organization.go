@@ -20,6 +20,9 @@ var (
 	ErrOwnerNotFound = errors.New("user not found")
 	// ErrForbidden reports an Actor not allowed to perform the operation.
 	ErrForbidden = errors.New("not allowed")
+	// ErrNotFound reports an Organization that does not exist or that the
+	// Actor cannot see, without telling which (ADR 0003).
+	ErrNotFound = errors.New("organization not found")
 )
 
 const maxNameLength = 255
@@ -42,6 +45,16 @@ func ParseUserID(raw string) (UserID, error) {
 		return "", ErrInvalidUserID
 	}
 	return UserID(id), nil
+}
+
+// ParseOrganizationID normalizes an Organization ID; anything that is not a
+// UUID names no Organization.
+func ParseOrganizationID(raw string) (OrganizationID, error) {
+	id := strings.ToLower(strings.TrimSpace(raw))
+	if !uuidPattern.MatchString(id) {
+		return "", ErrNotFound
+	}
+	return OrganizationID(id), nil
 }
 
 // ParseName trims an Organization name and checks it is neither blank nor too long.
@@ -88,3 +101,8 @@ type Actor struct {
 // Only Administrators can, until the Instance setting that opens it to any
 // User exists.
 func (a Actor) CanCreateOrganization() bool { return a.IsAdministrator }
+
+// SeesAllOrganizations reports whether the Actor sees every Organization,
+// as Administrators do (ADR 0009); others see only those they hold an
+// Organization Membership in.
+func (a Actor) SeesAllOrganizations() bool { return a.IsAdministrator }
