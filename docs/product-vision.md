@@ -1,7 +1,5 @@
 # OpenBoard: product vision
 
-**English** | [Português (Brasil)](product-vision.pt-BR.md)
-
 ## 1. Overview
 
 **OpenBoard** will be an open source project management and work tracking platform, inspired by established tools such as Azure DevOps Boards, Jira and Plane.
