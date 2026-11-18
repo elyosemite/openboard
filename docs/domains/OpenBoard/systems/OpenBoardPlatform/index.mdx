@@ -1,0 +1,46 @@
+---
+id: OpenBoardPlatform
+name: OpenBoard Platform
+version: 0.0.1
+summary: The Modular Monolith that runs OpenBoard, made of one backend deployable, the web application and one PostgreSQL database.
+scope: internal
+owners:
+  - maintainers
+services:
+  - id: IdentityModule
+  - id: OrganizationsModule
+  - id: WebApp
+containers:
+  - id: openboard-db
+actors:
+  - id: user
+    name: User
+    label: signs in and works in Organizations
+    direction: inbound
+  - id: administrator
+    name: Administrator
+    label: manages the Instance and creates Organizations
+    direction: inbound
+repository:
+  language: Go
+  url: https://github.com/elyosemite/openboard
+---
+
+## Overview
+
+OpenBoard Platform ships the backend as a single deployable. [[service|IdentityModule]] and [[service|OrganizationsModule]] are modules of that deployable: they keep separate boundaries and call each other in process, never over the network.
+
+## Context
+
+<ContextDiagram />
+
+## What's inside
+
+<NodeGraph />
+
+| Component | Type | Responsibility |
+|-----------|------|----------------|
+| [[service\|IdentityModule]] | Backend module | Users, passwords and sessions |
+| [[service\|OrganizationsModule]] | Backend module | Organizations, their Default Workspace and Organization Memberships |
+| [[service\|WebApp]] | Web application | The React interface |
+| [[container\|openboard-db]] | Data store | The system of record |

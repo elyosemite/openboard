@@ -1,0 +1,24 @@
+---
+id: WebApp
+name: Web App
+version: 0.0.1
+summary: React and TypeScript interface of OpenBoard, which today covers signing in, signing out and changing the password.
+owners:
+  - maintainers
+sends:
+  - id: SignIn
+  - id: SignOut
+  - id: ChangePassword
+  - id: GetCurrentUser
+repository:
+  language: TypeScript
+  url: https://github.com/elyosemite/openboard/tree/main/frontend
+---
+
+## Overview
+
+The Web App talks to the backend over the HTTP API. Its authentication feature calls [[service|IdentityModule]]; it does not call [[service|OrganizationsModule]] yet.
+
+<NodeGraph />
+
+<MessageTable format="all" />
