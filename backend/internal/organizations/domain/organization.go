@@ -89,6 +89,8 @@ type Organization struct {
 	ID        OrganizationID
 	Name      string
 	CreatedAt time.Time
+	// ViewerRole is the role the Actor who read the Organization acts with.
+	ViewerRole Role
 }
 
 // Actor is the signed-in User behind a request.
