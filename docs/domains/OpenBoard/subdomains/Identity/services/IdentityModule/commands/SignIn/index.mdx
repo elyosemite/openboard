@@ -1,0 +1,23 @@
+---
+id: SignIn
+name: Sign in
+version: 0.0.1
+summary: Checks a Username and password and starts a session for the User.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: POST
+  path: /api/v1/sessions
+  statusCodes: ['201', '400', '401', '403', '405', '415', '429']
+---
+
+## Overview
+
+A successful sign-in returns the [[entity|User]] and sets the session cookie. Every credential failure gives the same 401, so the response never reveals whether a Username exists. After repeated failures the Username is blocked for a few minutes (429).
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />

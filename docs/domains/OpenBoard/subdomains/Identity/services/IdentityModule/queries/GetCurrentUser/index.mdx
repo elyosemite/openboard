@@ -1,0 +1,23 @@
+---
+id: GetCurrentUser
+name: Get current User
+version: 0.0.1
+summary: Returns the signed-in User.
+owners:
+  - maintainers
+schemaPath: schema.json
+operation:
+  method: GET
+  path: /api/v1/users/me
+  statusCodes: ['200', '401', '405']
+---
+
+## Overview
+
+This query stays available while a Temporary Password is pending, so clients know they must ask for a new password.
+
+<NodeGraph />
+
+## Schema
+
+<SchemaViewer file="schema.json" />
