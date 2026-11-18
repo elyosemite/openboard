@@ -4,6 +4,8 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"slices"
+	"strings"
 )
 
 // HandlerFunc is an HTTP handler that reports failures by returning an error,
@@ -36,11 +38,22 @@ func WriteError(logger *slog.Logger, w http.ResponseWriter, r *http.Request, err
 // Route registers h for method+pattern and answers any other method on the
 // same pattern with a 405 problem instead of the mux's plain-text reply.
 func Route(mux *http.ServeMux, logger *slog.Logger, method, pattern string, h HandlerFunc) {
-	mux.Handle(method+" "+pattern, Handle(logger, h))
-	allow := method
-	if method == http.MethodGet {
-		allow = "GET, HEAD"
+	RouteMethods(mux, logger, pattern, map[string]HandlerFunc{method: h})
+}
+
+// RouteMethods registers one handler per method on the same pattern, which
+// Route cannot do since the 405 fallback may be registered only once.
+func RouteMethods(mux *http.ServeMux, logger *slog.Logger, pattern string, handlers map[string]HandlerFunc) {
+	allowed := make([]string, 0, len(handlers)+1)
+	for method, h := range handlers {
+		mux.Handle(method+" "+pattern, Handle(logger, h))
+		allowed = append(allowed, method)
+		if method == http.MethodGet {
+			allowed = append(allowed, http.MethodHead)
+		}
 	}
+	slices.Sort(allowed)
+	allow := strings.Join(allowed, ", ")
 	mux.Handle(pattern, Handle(logger, func(w http.ResponseWriter, _ *http.Request) error {
 		w.Header().Set("Allow", allow)
 		return ErrMethodNotAllowed()

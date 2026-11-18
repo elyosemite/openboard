@@ -107,11 +107,14 @@ func TestRouteMatchesMethodAndRejectsOthers(t *testing.T) {
 	}
 	Route(mux, discardLogger(), http.MethodGet, "/ping", ok)
 	Route(mux, discardLogger(), http.MethodPost, "/items", ok)
+	RouteMethods(mux, discardLogger(), "/things", map[string]HandlerFunc{http.MethodPost: ok, http.MethodGet: ok})
 
-	if rec := serve(mux, http.MethodGet, "/ping"); rec.Code != http.StatusNoContent {
-		t.Errorf("GET /ping = %d", rec.Code)
+	for _, req := range [][2]string{{http.MethodGet, "/ping"}, {http.MethodGet, "/things"}, {http.MethodPost, "/things"}} {
+		if rec := serve(mux, req[0], req[1]); rec.Code != http.StatusNoContent {
+			t.Errorf("%s %s = %d", req[0], req[1], rec.Code)
+		}
 	}
-	cases := map[string]string{"/ping": "GET, HEAD", "/items": "POST"}
+	cases := map[string]string{"/ping": "GET, HEAD", "/items": "POST", "/things": "GET, HEAD, POST"}
 	for path, allow := range cases {
 		rec := serve(mux, http.MethodDelete, path)
 		p := decodeProblem(t, rec)
