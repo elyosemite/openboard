@@ -1,5 +1,4 @@
 import { useId, type InputHTMLAttributes } from 'react';
-import './TextField.css';
 
 interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   label: string;
@@ -12,21 +11,22 @@ export function TextField({ label, error, ...rest }: TextFieldProps) {
   const errorId = `${id}-error`;
   const invalid = error !== undefined && error !== '';
   return (
-    <div className="ob-field">
-      <label htmlFor={id} className="ob-field__label">
+    <div className="field">
+      <label htmlFor={id} className="field__label">
         {label}
       </label>
-      <input
-        {...rest}
-        id={id}
-        className="ob-field__input"
-        aria-invalid={invalid || undefined}
-        aria-describedby={invalid ? errorId : undefined}
-      />
+      <div className={invalid ? 'input is-invalid' : 'input'}>
+        <input
+          {...rest}
+          id={id}
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? errorId : undefined}
+        />
+      </div>
       {invalid && (
-        <p id={errorId} className="ob-field__error">
+        <span id={errorId} className="field__help field__help--error">
           {error}
-        </p>
+        </span>
       )}
     </div>
   );

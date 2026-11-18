@@ -50,6 +50,8 @@ func insertOrganization(ctx context.Context, tx pgx.Tx, n application.NewOrganiz
 		return domain.Organization{}, fmt.Errorf("insert organization: %w", err)
 	}
 	org.ID = domain.OrganizationID(id)
+	// Only Administrators create Organizations, and they act as Organization Owner.
+	org.ViewerRole = domain.RoleOwner
 	if _, err := tx.Exec(ctx, `INSERT INTO workspaces (organization_id, name, visibility) VALUES ($1, $2, $3)`,
 		id, n.DefaultWorkspaceName, string(domain.VisibilityOpen)); err != nil {
 		return domain.Organization{}, fmt.Errorf("insert default workspace: %w", err)

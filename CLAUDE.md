@@ -41,6 +41,7 @@ Full product and architecture context: `docs/product-vision.md`. Read the releva
 
 - Organized by feature (`src/features/<feature>/`), with a centralized Design System.
 - Separate presentation, state and API communication.
+- Build every screen only with the tokens and components of the OCaml Design System (ADR 0011). Propose what is missing to the design system instead of creating it here.
 - Tools: ESLint, TypeScript in `strict` mode, Prettier.
 
 ## Before considering a task done

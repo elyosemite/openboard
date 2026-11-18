@@ -28,6 +28,9 @@ databaseChangeLog:
   - include:
       file: ../tables/20261116190003_create_organization_memberships_table.sql
       relativeToChangelogFile: true
+  - include:
+      file: ../tables/20261118110001_create_workspace_memberships_table.sql
+      relativeToChangelogFile: true
 
   # 3. constraints
   - include:
@@ -45,6 +48,12 @@ databaseChangeLog:
   - include:
       file: ../constraints/20261116190006_add_organization_memberships_constraints.sql
       relativeToChangelogFile: true
+  - include:
+      file: ../constraints/20261118110002_add_workspaces_organization_unique.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../constraints/20261118110003_add_workspace_memberships_constraints.sql
+      relativeToChangelogFile: true
 
   # 4. indexes
   - include:
@@ -52,4 +61,7 @@ databaseChangeLog:
       relativeToChangelogFile: true
   - include:
       file: ../indexes/20261116190007_create_organizations_indexes.sql
+      relativeToChangelogFile: true
+  - include:
+      file: ../indexes/20261118110004_create_workspace_indexes.sql
       relativeToChangelogFile: true

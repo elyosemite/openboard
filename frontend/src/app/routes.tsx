@@ -6,6 +6,12 @@ import {
   RequireAuth,
   SIGN_IN_PATH,
 } from '../features/auth';
+import {
+  ORGANIZATION_ROUTE,
+  OrganizationPage,
+  WORKSPACE_ROUTE,
+  WorkspacePage,
+} from '../features/organizations';
 import { AppLayout } from './AppLayout';
 import { HomePage } from './HomePage';
 
@@ -19,6 +25,8 @@ export const routes: RouteObject[] = [
         children: [
           { path: '/', element: <HomePage /> },
           { path: CHANGE_PASSWORD_PATH, element: <ChangePasswordPage /> },
+          { path: ORGANIZATION_ROUTE, element: <OrganizationPage /> },
+          { path: WORKSPACE_ROUTE, element: <WorkspacePage /> },
         ],
       },
     ],

@@ -16,9 +16,16 @@ import (
 const visible = `($1 OR EXISTS (
 	SELECT 1 FROM organization_memberships m WHERE m.organization_id = o.id AND m.user_id = $2::uuid))`
 
+// viewerRole is the role a Scope acts with in Organization o: Organization
+// Owner for those who see all ($1, ADR 0009), otherwise their Membership's role.
+const viewerRole = `CASE WHEN $1 THEN 'owner' ELSE (
+	SELECT m.role FROM organization_memberships m WHERE m.organization_id = o.id AND m.user_id = $2::uuid) END`
+
+const organizationColumns = `o.id::text, o.name, o.created_at, ` + viewerRole
+
 // Find returns the Organization with id if scope sees it, or domain.ErrNotFound.
 func (r *Organizations) Find(ctx context.Context, id domain.OrganizationID, scope application.Scope) (domain.Organization, error) {
-	row := r.pool.QueryRow(ctx, `SELECT o.id::text, o.name, o.created_at FROM organizations o
+	row := r.pool.QueryRow(ctx, `SELECT `+organizationColumns+` FROM organizations o
 		WHERE o.id = $3 AND `+visible, scope.All, nullableUser(scope), string(id))
 	org, err := scanOrganization(row)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -36,7 +43,7 @@ func (r *Organizations) List(ctx context.Context, scope application.Scope, page 
 		scope.All, nullableUser(scope)).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count organizations: %w", err)
 	}
-	rows, err := r.pool.Query(ctx, `SELECT o.id::text, o.name, o.created_at FROM organizations o
+	rows, err := r.pool.Query(ctx, `SELECT `+organizationColumns+` FROM organizations o
 		WHERE `+visible+` ORDER BY lower(o.name), o.id LIMIT $3 OFFSET $4`,
 		scope.All, nullableUser(scope), page.Limit, page.Offset)
 	if err != nil {
@@ -62,12 +69,13 @@ func nullableUser(scope application.Scope) *string {
 
 func scanOrganization(row pgx.Row) (domain.Organization, error) {
 	var (
-		org domain.Organization
-		id  string
+		org      domain.Organization
+		id, role string
 	)
-	if err := row.Scan(&id, &org.Name, &org.CreatedAt); err != nil {
+	if err := row.Scan(&id, &org.Name, &org.CreatedAt, &role); err != nil {
 		return domain.Organization{}, err
 	}
 	org.ID = domain.OrganizationID(id)
+	org.ViewerRole = domain.Role(role)
 	return org, nil
 }
