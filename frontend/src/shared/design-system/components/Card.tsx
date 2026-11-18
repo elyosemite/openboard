@@ -1,5 +1,4 @@
 import { useId, type ReactNode } from 'react';
-import './Card.css';
 
 interface CardProps {
   title: string;
@@ -9,11 +8,13 @@ interface CardProps {
 export function Card({ title, children }: CardProps) {
   const titleId = useId();
   return (
-    <section className="ob-card" aria-labelledby={titleId}>
-      <h2 id={titleId} className="ob-card__title">
-        {title}
-      </h2>
-      <div className="ob-card__body">{children}</div>
+    <section className="panel" aria-labelledby={titleId}>
+      <header className="panel__head">
+        <h2 id={titleId} className="panel__title">
+          {title}
+        </h2>
+      </header>
+      <div className="panel__body">{children}</div>
     </section>
   );
 }

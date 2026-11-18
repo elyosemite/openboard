@@ -1,15 +1,24 @@
 import { render, screen } from '@testing-library/react';
-import { Alert, Badge, Button, Card, TextField } from '.';
+import { Alert, Button, Card, Icon, Lozenge, TextField } from '.';
 
-describe('Badge', () => {
+describe('Lozenge', () => {
   it('defaults to the neutral tone', () => {
-    render(<Badge>Idle</Badge>);
-    expect(screen.getByText('Idle')).toHaveClass('ob-badge', 'ob-badge--neutral');
+    render(<Lozenge>Idle</Lozenge>);
+    expect(screen.getByText('Idle')).toHaveAttribute('class', 'lozenge');
   });
 
   it('applies the requested tone', () => {
-    render(<Badge tone="danger">Down</Badge>);
-    expect(screen.getByText('Down')).toHaveClass('ob-badge--danger');
+    render(<Lozenge tone="danger">Down</Lozenge>);
+    expect(screen.getByText('Down')).toHaveClass('lozenge', 'lozenge--removed');
+  });
+});
+
+describe('Icon', () => {
+  it('points at the named symbol and stays hidden from assistive technology', () => {
+    const { container } = render(<Icon name="info" />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('aria-hidden', 'true');
+    expect(svg?.querySelector('use')?.getAttribute('href')).toMatch(/#i-info$/);
   });
 });
 
@@ -29,7 +38,7 @@ describe('Button', () => {
     render(<Button>Save</Button>);
     const button = screen.getByRole('button', { name: 'Save' });
     expect(button).toHaveAttribute('type', 'button');
-    expect(button).toHaveClass('ob-button--primary');
+    expect(button).toHaveClass('btn', 'btn--primary');
     expect(button).toBeEnabled();
     expect(button).not.toHaveAttribute('aria-busy');
   });
@@ -43,7 +52,7 @@ describe('Button', () => {
     const button = screen.getByRole('button', { name: 'Saving' });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute('aria-busy', 'true');
-    expect(button).toHaveClass('ob-button--secondary');
+    expect(button).toHaveClass('btn', 'btn--outline');
   });
 
   it('honours disabled', () => {
@@ -58,6 +67,7 @@ describe('TextField', () => {
     const input = screen.getByLabelText('Username');
     expect(input).not.toHaveAttribute('aria-invalid');
     expect(input).not.toHaveAttribute('aria-describedby');
+    expect(input.parentElement).not.toHaveClass('is-invalid');
   });
 
   it('links the error message and marks the input invalid', () => {
@@ -65,6 +75,7 @@ describe('TextField', () => {
     const input = screen.getByLabelText('Password');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAccessibleDescription('Too short');
+    expect(input.parentElement).toHaveClass('input', 'is-invalid');
   });
 });
 
@@ -76,6 +87,8 @@ describe('Alert', () => {
 
   it('interrupts for danger', () => {
     render(<Alert tone="danger">Failed</Alert>);
-    expect(screen.getByRole('alert')).toHaveClass('ob-alert--danger');
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('Failed');
+    expect(alert.parentElement).toHaveClass('section-message', 'section-message--error');
   });
 });

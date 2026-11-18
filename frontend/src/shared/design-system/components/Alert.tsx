@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import './Alert.css';
+import { Icon } from './Icon';
 
 export type AlertTone = 'info' | 'danger';
 
@@ -10,9 +10,11 @@ interface AlertProps {
 
 /** Danger alerts interrupt screen readers; info alerts are announced politely. */
 export function Alert({ tone = 'info', children }: AlertProps) {
+  const danger = tone === 'danger';
   return (
-    <div role={tone === 'danger' ? 'alert' : 'status'} className={`ob-alert ob-alert--${tone}`}>
-      {children}
+    <div className={danger ? 'section-message section-message--error' : 'section-message'}>
+      <Icon name={danger ? 'error' : 'info'} />
+      <div role={danger ? 'alert' : 'status'}>{children}</div>
     </div>
   );
 }
