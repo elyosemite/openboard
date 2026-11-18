@@ -18,6 +18,8 @@ import (
 // Service is the part of the Organization application the HTTP layer uses.
 type Service interface {
 	CreateOrganization(ctx context.Context, actor domain.Actor, in application.CreateOrganizationInput) (domain.Organization, error)
+	GetOrganization(ctx context.Context, actor domain.Actor, rawID string) (domain.Organization, error)
+	ListOrganizations(ctx context.Context, actor domain.Actor, page application.PageRequest) ([]domain.Organization, int, error)
 }
 
 // Auth authenticates requests and tells who is behind them.
@@ -42,7 +44,36 @@ func NewHandler(svc Service, auth Auth, logger *slog.Logger) *Handler {
 
 // Register adds the Organization routes to mux.
 func (h *Handler) Register(mux *http.ServeMux) {
-	httpx.Route(mux, h.logger, http.MethodPost, "/api/v1/organizations", h.auth.Authenticated(h.create))
+	httpx.RouteMethods(mux, h.logger, "/api/v1/organizations", map[string]httpx.HandlerFunc{
+		http.MethodGet:  h.auth.Authenticated(h.list),
+		http.MethodPost: h.auth.Authenticated(h.create),
+	})
+	httpx.Route(mux, h.logger, http.MethodGet, "/api/v1/organizations/{organization_id}", h.auth.Authenticated(h.get))
+}
+
+func (h *Handler) list(w http.ResponseWriter, r *http.Request) error {
+	q, err := httpx.ParsePageQuery(r)
+	if err != nil {
+		return err
+	}
+	orgs, total, err := h.svc.ListOrganizations(r.Context(), h.auth.Actor(r.Context()),
+		application.PageRequest{Limit: q.PageSize, Offset: q.Offset()})
+	if err != nil {
+		return err
+	}
+	items := make([]organizationResponse, 0, len(orgs))
+	for _, org := range orgs {
+		items = append(items, toOrganizationResponse(org))
+	}
+	return httpx.WriteJSON(w, http.StatusOK, httpx.NewPageResponse(items, q, total))
+}
+
+func (h *Handler) get(w http.ResponseWriter, r *http.Request) error {
+	org, err := h.svc.GetOrganization(r.Context(), h.auth.Actor(r.Context()), r.PathValue("organization_id"))
+	if err != nil {
+		return mapError(err)
+	}
+	return httpx.WriteJSON(w, http.StatusOK, toOrganizationResponse(org))
 }
 
 type createRequest struct {
@@ -61,13 +92,17 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) error {
 		return mapError(err)
 	}
 	w.Header().Set("Location", "/api/v1/organizations/"+string(org.ID))
-	return httpx.WriteJSON(w, http.StatusCreated, organizationResponse{ID: org.ID, Name: org.Name, CreatedAt: org.CreatedAt})
+	return httpx.WriteJSON(w, http.StatusCreated, toOrganizationResponse(org))
 }
 
 type organizationResponse struct {
 	ID        domain.OrganizationID `json:"id"`
 	Name      string                `json:"name"`
 	CreatedAt time.Time             `json:"created_at"`
+}
+
+func toOrganizationResponse(org domain.Organization) organizationResponse {
+	return organizationResponse{ID: org.ID, Name: org.Name, CreatedAt: org.CreatedAt}
 }
 
 // fieldErrors maps each domain validation error to the request field it concerns.
@@ -85,6 +120,9 @@ var fieldErrors = []struct {
 func mapError(err error) error {
 	if errors.Is(err, domain.ErrForbidden) {
 		return &httpx.Error{Status: http.StatusForbidden, Slug: "forbidden", Title: "Not allowed"}
+	}
+	if errors.Is(err, domain.ErrNotFound) {
+		return httpx.ErrNotFound()
 	}
 	var fields []httpx.FieldError
 	for _, fe := range fieldErrors {

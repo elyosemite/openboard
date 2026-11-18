@@ -17,12 +17,31 @@ import (
 	"github.com/elyosemite/openboard/backend/internal/platform/httpx"
 )
 
+var created = time.Date(2026, 11, 17, 12, 0, 0, 0, time.UTC)
+
 var administrator = domain.Actor{UserID: "00000000-0000-0000-0000-00000000000a", IsAdministrator: true}
 
 type fakeService struct {
 	err   error
 	actor domain.Actor
 	in    application.CreateOrganizationInput
+	id    string
+	page  application.PageRequest
+	orgs  []domain.Organization
+	total int
+}
+
+func (f *fakeService) GetOrganization(_ context.Context, actor domain.Actor, rawID string) (domain.Organization, error) {
+	f.actor, f.id = actor, rawID
+	if f.err != nil {
+		return domain.Organization{}, f.err
+	}
+	return domain.Organization{ID: domain.OrganizationID(rawID), Name: "Acme", CreatedAt: created}, nil
+}
+
+func (f *fakeService) ListOrganizations(_ context.Context, actor domain.Actor, page application.PageRequest) ([]domain.Organization, int, error) {
+	f.actor, f.page = actor, page
+	return f.orgs, f.total, f.err
 }
 
 func (f *fakeService) CreateOrganization(_ context.Context, actor domain.Actor, in application.CreateOrganizationInput) (domain.Organization, error) {
@@ -30,7 +49,7 @@ func (f *fakeService) CreateOrganization(_ context.Context, actor domain.Actor, 
 	if f.err != nil {
 		return domain.Organization{}, f.err
 	}
-	return domain.Organization{ID: "o1", Name: in.Name, CreatedAt: time.Date(2026, 11, 17, 12, 0, 0, 0, time.UTC)}, nil
+	return domain.Organization{ID: "o1", Name: in.Name, CreatedAt: created}, nil
 }
 
 // fakeAuth lets requests through as administrator unless signedOut is set.
@@ -48,14 +67,20 @@ func fakeAuth(signedOut bool) Auth {
 	}
 }
 
-func post(svc Service, auth Auth, body string) *httptest.ResponseRecorder {
+func serve(svc Service, auth Auth, method, path, body string) *httptest.ResponseRecorder {
 	mux := http.NewServeMux()
 	NewHandler(svc, auth, slog.New(slog.NewTextHandler(io.Discard, nil))).Register(mux)
-	r := httptest.NewRequest(http.MethodPost, "/api/v1/organizations", strings.NewReader(body))
-	r.Header.Set("Content-Type", "application/json")
+	r := httptest.NewRequest(method, path, strings.NewReader(body))
+	if body != "" {
+		r.Header.Set("Content-Type", "application/json")
+	}
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, r)
 	return rec
+}
+
+func post(svc Service, auth Auth, body string) *httptest.ResponseRecorder {
+	return serve(svc, auth, http.MethodPost, "/api/v1/organizations", body)
 }
 
 func problemOf(t *testing.T, rec *httptest.ResponseRecorder) httpx.Problem {
@@ -125,5 +150,63 @@ func TestCreateOrganizationErrors(t *testing.T) {
 				t.Errorf("fields %v, want %v", got, tc.fields)
 			}
 		})
+	}
+}
+
+func TestListOrganizations(t *testing.T) {
+	svc := &fakeService{orgs: []domain.Organization{{ID: "o1", Name: "Acme", CreatedAt: created}}, total: 21}
+	rec := serve(svc, fakeAuth(false), http.MethodGet, "/api/v1/organizations?page=2&page_size=10", "")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d: %s", rec.Code, rec.Body.String())
+	}
+	if svc.actor != administrator || svc.page != (application.PageRequest{Limit: 10, Offset: 10}) {
+		t.Errorf("service called with %+v, %+v", svc.actor, svc.page)
+	}
+	want := `{"items":[{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z"}],"page":2,"page_size":10,"total_items":21,"total_pages":3}`
+	if got := strings.TrimSpace(rec.Body.String()); got != want {
+		t.Errorf("body %s, want %s", got, want)
+	}
+}
+
+func TestListOrganizationsFailures(t *testing.T) {
+	cases := map[string]struct {
+		svc    *fakeService
+		query  string
+		status int
+	}{
+		"bad page":      {&fakeService{}, "?page=0", http.StatusUnprocessableEntity},
+		"service error": {&fakeService{err: errors.New("store down")}, "", http.StatusInternalServerError},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if rec := serve(tc.svc, fakeAuth(false), http.MethodGet, "/api/v1/organizations"+tc.query, ""); rec.Code != tc.status {
+				t.Errorf("status %d, want %d", rec.Code, tc.status)
+			}
+		})
+	}
+}
+
+func TestGetOrganization(t *testing.T) {
+	svc := &fakeService{}
+	rec := serve(svc, fakeAuth(false), http.MethodGet, "/api/v1/organizations/o1", "")
+	if rec.Code != http.StatusOK || svc.id != "o1" || svc.actor != administrator {
+		t.Fatalf("status %d, id %q, actor %+v", rec.Code, svc.id, svc.actor)
+	}
+	if want := `{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z"}`; strings.TrimSpace(rec.Body.String()) != want {
+		t.Errorf("body %s", rec.Body.String())
+	}
+
+	rec = serve(&fakeService{err: domain.ErrNotFound}, fakeAuth(false), http.MethodGet, "/api/v1/organizations/o2", "")
+	if p := problemOf(t, rec); rec.Code != http.StatusNotFound || !strings.HasSuffix(p.Type, "/not-found") {
+		t.Errorf("status %d, type %q; want 404 not-found", rec.Code, p.Type)
+	}
+}
+
+func TestOrganizationRoutesRequireSession(t *testing.T) {
+	for _, path := range []string{"/api/v1/organizations", "/api/v1/organizations/o1"} {
+		if rec := serve(&fakeService{}, fakeAuth(true), http.MethodGet, path, ""); rec.Code != http.StatusUnauthorized {
+			t.Errorf("GET %s = %d, want 401", path, rec.Code)
+		}
 	}
 }

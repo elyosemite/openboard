@@ -228,6 +228,40 @@ paths:
                     code: weak
                     message: use at least 12 characters
   /api/v1/organizations:
+    get:
+      tags: [organizations]
+      operationId: listOrganizations
+      summary: List Organizations
+      description: |
+        Lists the Organizations the signed-in User can see, ordered by name
+        ignoring case: every Organization for an Administrator (ADR 0009),
+        otherwise those the User holds an Organization Membership in.
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: One page of Organizations.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Organization"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/PasswordChangeRequired"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "422":
+          $ref: "#/components/responses/InvalidPage"
     post:
       tags: [organizations]
       operationId: createOrganization
@@ -296,7 +330,65 @@ paths:
                   - field: owner_user_id
                     code: not_found
                     message: user not found
+  /api/v1/organizations/{organization_id}:
+    get:
+      tags: [organizations]
+      operationId: getOrganization
+      summary: Get an Organization
+      description: |
+        Returns an Organization the signed-in User can see. Organizations that
+        do not exist and those the User cannot see both answer 404, so the
+        response never reveals another tenant's Organizations (ADR 0003).
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The Organization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/PasswordChangeRequired"
+        "404":
+          description: No such Organization, or the User cannot see it.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/not-found
+                title: Resource not found
+                status: 404
+                instance: /api/v1/organizations/0b5e3c1a-9f2d-4e6b-8a7c-1d2e3f4a5b6c
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
 components:
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Page number, starting at 1.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: page_size
+      in: query
+      description: Records per page.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
   securitySchemes:
     sessionCookie:
       type: apiKey
@@ -373,6 +465,23 @@ components:
         must_change_password:
           type: boolean
           description: Whether a Temporary Password is pending.
+    Page:
+      type: object
+      description: Pagination fields of every collection response; `items` holds the records.
+      required: [page, page_size, total_items, total_pages]
+      properties:
+        page:
+          type: integer
+          example: 1
+        page_size:
+          type: integer
+          example: 20
+        total_items:
+          type: integer
+          example: 42
+        total_pages:
+          type: integer
+          example: 3
     HealthStatus:
       type: object
       required: [status]
@@ -420,6 +529,30 @@ components:
           type: string
           description: Human-readable explanation.
   responses:
+    PasswordChangeRequired:
+      description: The signed-in User must change a pending Temporary Password first.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: https://openboard.dev/problems/password-change-required
+            title: Password change required
+            status: 403
+    InvalidPage:
+      description: "`page` or `page_size` is out of range."
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: https://openboard.dev/problems/validation-error
+            title: Validation failed
+            status: 422
+            errors:
+              - field: page_size
+                code: invalid
+                message: page_size must be a whole number from 1 to 100
     Unauthenticated:
       description: No valid session. Sign in again.
       content:
