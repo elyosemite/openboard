@@ -1,13 +1,13 @@
-# Rótulos de triagem
+# Triage labels
 
-As skills usam cinco papéis canônicos de triagem. Esta tabela liga cada papel ao valor gravado na linha `Status:` das issues deste repositório.
+The skills use five canonical triage roles. This table maps each role to the value written on the `Status:` line of this repository's issues.
 
-| Papel em mattpocock/skills | Valor no OpenBoard | Significado                                  |
-| -------------------------- | ------------------ | -------------------------------------------- |
-| `needs-triage`             | `needs-triage`     | O mantenedor precisa avaliar a issue         |
-| `needs-info`               | `needs-info`       | Aguardando mais informações de quem reportou |
-| `ready-for-agent`          | `ready-for-agent`  | Totalmente especificada, pronta para agente  |
-| `ready-for-human`          | `ready-for-human`  | Exige implementação humana                   |
-| `wontfix`                  | `wontfix`          | Não será feita                               |
+| Role in mattpocock/skills | Value in OpenBoard | Meaning                                  |
+| ------------------------- | ------------------ | ---------------------------------------- |
+| `needs-triage`            | `needs-triage`     | Maintainer needs to evaluate this issue  |
+| `needs-info`              | `needs-info`       | Waiting on reporter for more information |
+| `ready-for-agent`         | `ready-for-agent`  | Fully specified, ready for an AFK agent  |
+| `ready-for-human`         | `ready-for-human`  | Requires human implementation            |
+| `wontfix`                 | `wontfix`          | Will not be actioned                     |
 
-Quando uma skill mencionar um papel (por exemplo, "aplique o rótulo de pronta para agente"), use o valor correspondente desta tabela.
+When a skill mentions a role (for example, "apply the AFK-ready triage label"), use the matching value from this table.

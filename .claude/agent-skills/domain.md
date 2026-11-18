@@ -1,15 +1,15 @@
-# Documentação de domínio
+# Domain docs
 
-Como as skills de engenharia devem consumir a documentação de domínio deste repositório. O OpenBoard usa **contexto único**.
+How the engineering skills should consume this repository's domain documentation. OpenBoard uses a **single context**.
 
-## Antes de explorar, leia
+## Before exploring, read
 
-- **`CONTEXT.md`** na raiz: o glossário do domínio.
-- **`docs/adrs/NNNN-titulo/index.mdx`**: os ADRs que tocam a área em que você vai trabalhar.
+- **`CONTEXT.md`** at the root: the domain glossary.
+- **`docs/adrs/NNNN-title/index.mdx`**: the ADRs that touch the area you are about to work in.
 
-Os ADRs seguem o formato do EventCatalog (ADR 0008). Não use `docs/adr/`.
+ADRs follow the EventCatalog format (ADR 0008). Do not use `docs/adr/`.
 
-## Estrutura de arquivos
+## File structure
 
 ```
 /
@@ -22,14 +22,14 @@ Os ADRs seguem o formato do EventCatalog (ADR 0008). Não use `docs/adr/`.
     └── organizations/
 ```
 
-## Use o vocabulário do glossário
+## Use the glossary's vocabulary
 
-Quando sua saída nomear um conceito do domínio (título de issue, proposta de refatoração, hipótese, nome de teste), use o termo definido em `CONTEXT.md`. Não use os sinônimos que o glossário manda evitar.
+When your output names a domain concept (issue title, refactoring proposal, hypothesis, test name), use the term defined in `CONTEXT.md`. Do not use the synonyms the glossary says to avoid.
 
-Se o conceito ainda não estiver no glossário, há duas possibilidades: você está inventando uma linguagem que o projeto não usa, e deve reconsiderar, ou existe uma lacuna real, que deve ser anotada para `/grill-with-docs`.
+If the concept is not in the glossary yet, either you are inventing language the project does not use, and should reconsider, or there is a real gap, which should be noted for `/grill-with-docs`.
 
-## Aponte conflitos com ADRs
+## Flag ADR conflicts
 
-Se sua saída contradisser um ADR existente, diga isso explicitamente em vez de ignorá-lo:
+If your output contradicts an existing ADR, say so explicitly instead of ignoring it:
 
-> _Contradiz o ADR 0007 (Project é uma fronteira estrutural), mas vale reabrir porque…_
+> _Contradicts ADR 0007 (Project is a structural boundary), but worth reopening because…_
