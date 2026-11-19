@@ -6,6 +6,8 @@ import {
   getWorkspace,
   listOrganizations,
   listWorkspaces,
+  updateWorkspace,
+  type WorkspaceChange,
 } from '../api/organizationsApi';
 
 const workspacesKey = (organizationId: string) => ['workspaces', organizationId] as const;
@@ -43,6 +45,17 @@ export function useWorkspace(id: string) {
   return useQuery({
     queryKey: ['workspace', id],
     queryFn: ({ signal }) => getWorkspace(id, signal),
+  });
+}
+
+export function useUpdateWorkspace(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (change: WorkspaceChange) => updateWorkspace(id, change),
+    onSuccess: (workspace) => {
+      queryClient.setQueryData(['workspace', id], workspace);
+      return queryClient.invalidateQueries({ queryKey: workspacesKey(workspace.organizationId) });
+    },
   });
 }
 

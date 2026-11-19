@@ -32,6 +32,7 @@ const workspaceDto = (overrides: object = {}) => ({
   visibility: 'open',
   created_at: '2026-11-17T12:00:00Z',
   updated_at: '2026-11-17T12:00:00Z',
+  current_user_role: 'contributor',
   ...overrides,
 });
 
@@ -375,5 +376,103 @@ describe('Workspace page', () => {
     renderRoute('/workspaces/w2');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Resource not found');
+  });
+});
+
+describe('Workspace settings', () => {
+  const legalDto = (overrides: object = {}) =>
+    workspaceDto({
+      id: 'w2',
+      name: 'Legal',
+      visibility: 'restricted',
+      current_user_role: 'owner',
+      ...overrides,
+    });
+
+  async function openSettings(routes: Parameters<typeof stubApi>[0] = {}) {
+    const fetchMock = stubApi({
+      ...signedIn,
+      'GET /api/v1/workspaces/w2': Response.json(legalDto()),
+      ...routes,
+    });
+    const rendered = renderRoute('/workspaces/w2');
+    await screen.findByRole('form', { name: 'Workspace settings' });
+    return { fetchMock, ...rendered };
+  }
+
+  it.each(['contributor', 'viewer'])('is not shown to a Workspace %s', async (role) => {
+    stubApi({
+      ...signedIn,
+      'GET /api/v1/workspaces/w2': Response.json(legalDto({ current_user_role: role })),
+    });
+    renderRoute('/workspaces/w2');
+
+    await screen.findByRole('heading', { name: 'Legal', level: 1 });
+    expect(screen.queryByRole('form', { name: 'Workspace settings' })).not.toBeInTheDocument();
+  });
+
+  it('saves only what changed and shows the result', async () => {
+    const { fetchMock, user } = await openSettings({
+      'PATCH /api/v1/workspaces/w2': Response.json(legalDto({ name: 'Legal team' })),
+      [workspacesUrl()]: pageOf([]),
+    });
+    const save = screen.getByRole('button', { name: 'Save changes' });
+    expect(save).toBeDisabled();
+
+    await user.clear(screen.getByLabelText('Name'));
+    await user.type(screen.getByLabelText('Name'), 'Legal team');
+    await user.click(save);
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Changes saved.');
+    expect(screen.getByRole('heading', { name: 'Legal team', level: 1 })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/workspaces/w2',
+      expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ name: 'Legal team' }) }),
+    );
+    expect(save).toBeDisabled();
+  });
+
+  it('changes the visibility', async () => {
+    const { fetchMock, user } = await openSettings({
+      'PATCH /api/v1/workspaces/w2': Response.json(legalDto({ visibility: 'open' })),
+      [workspacesUrl()]: pageOf([]),
+    });
+    const settings = screen.getByRole('form', { name: 'Workspace settings' });
+
+    await user.click(within(settings).getByRole('button', { name: 'Open' }));
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Changes saved.');
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/workspaces/w2',
+      expect.objectContaining({ body: JSON.stringify({ visibility: 'open' }) }),
+    );
+  });
+
+  it('shows a name already in use on the field', async () => {
+    const { user } = await openSettings({
+      'PATCH /api/v1/workspaces/w2': problem(409, 'workspace-name-taken', 'Taken'),
+    });
+
+    await user.type(screen.getByLabelText('Name'), ' team');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Name')).toHaveAccessibleDescription(
+        'Another Workspace in this Organization already uses this name.',
+      );
+    });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('reports other failures above the form', async () => {
+    const { user } = await openSettings({
+      'PATCH /api/v1/workspaces/w2': problem(403, 'forbidden', 'Not allowed'),
+    });
+
+    await user.type(screen.getByLabelText('Name'), ' team');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Not allowed');
   });
 });

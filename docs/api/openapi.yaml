@@ -521,6 +521,78 @@ paths:
                 $ref: "#/components/schemas/Problem"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
+    patch:
+      tags: [workspaces]
+      operationId: updateWorkspace
+      summary: Rename a Workspace or change its visibility
+      description: |
+        Changes the fields sent and keeps the others, the Default Workspace
+        included. Only those acting as Workspace Owner can change a Workspace:
+        its Workspace Owners, Organization Owners and Administrators.
+        Workspaces that do not exist and those the User cannot enter both
+        answer 404.
+      parameters:
+        - name: workspace_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkspaceRequest"
+      responses:
+        "200":
+          description: The Workspace after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          description: |
+            The signed-in User does not manage the Workspace (`forbidden`),
+            has a pending Temporary Password (`password-change-required`), or
+            the request is cross-origin (`cross-origin-request`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "404":
+          description: No such Workspace, or the User cannot enter it.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "409":
+          description: Another Workspace of the Organization already uses this name, ignoring case.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/workspace-name-taken
+                title: Workspace name already in use
+                status: 409
+                instance: /api/v1/workspaces/7c1d2e3f-4a5b-4c6d-8e7f-0a1b2c3d4e5f
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          description: |
+            The name is blank or too long (`name`/`invalid`), or the
+            visibility is not `open` or `restricted` (`visibility`/`invalid`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
 components:
   parameters:
     Page:
@@ -595,9 +667,22 @@ components:
           type: string
           enum: [open, restricted]
           default: restricted
+    UpdateWorkspaceRequest:
+      type: object
+      description: Fields left out keep their value.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Trimmed; must not be blank and must be unique in the Organization, ignoring case.
+          example: Legal team
+        visibility:
+          type: string
+          enum: [open, restricted]
     Workspace:
       type: object
-      required: [id, organization_id, name, visibility, created_at, updated_at]
+      required: [id, organization_id, name, visibility, created_at, updated_at, current_user_role]
       properties:
         id:
           type: string
@@ -617,6 +702,13 @@ components:
         updated_at:
           type: string
           format: date-time
+        current_user_role:
+          type: string
+          enum: [owner, contributor, viewer]
+          description: |
+            The Workspace role the signed-in User acts with. Administrators and
+            Organization Owners act as `owner`; without a Workspace Membership,
+            an Open Workspace gives `contributor`.
     SignInRequest:
       type: object
       required: [username, password]
