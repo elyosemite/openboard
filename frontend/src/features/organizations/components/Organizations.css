@@ -43,14 +43,14 @@
   gap: var(--space-100);
 }
 
-.workspace-form {
+.list-form {
   display: grid;
   gap: var(--space-200);
   padding: var(--space-200);
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.workspace-form__actions {
+.list-form__actions {
   display: flex;
   gap: var(--space-100);
 }

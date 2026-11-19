@@ -10,7 +10,7 @@ export function HomePage() {
       <Card title={`Welcome, ${user?.name ?? ''}`}>
         <p>You are signed in as {user?.username}.</p>
       </Card>
-      <OrganizationList />
+      <OrganizationList canCreate={user?.isAdministrator ?? false} />
     </div>
   );
 }

@@ -96,6 +96,95 @@ describe('Organizations on the home page', () => {
   });
 });
 
+describe('Creating an Organization', () => {
+  const notAdministrator = {
+    'GET /api/v1/users/me': Response.json(userDto({ is_administrator: false })),
+  };
+
+  it('is not offered to those who are not Administrators', async () => {
+    stubApi({ ...notAdministrator, [organizationsUrl()]: pageOf([]) });
+    renderRoute('/');
+
+    expect(
+      await screen.findByText(
+        'You will see an Organization here once an Organization Owner adds you to it.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'New Organization' })).not.toBeInTheDocument();
+  });
+
+  it('invites Administrators to create the first Organization', async () => {
+    stubApi({ ...signedIn, [organizationsUrl()]: pageOf([]) });
+    renderRoute('/');
+
+    expect(
+      await screen.findByText('Create the first Organization to start organizing work.'),
+    ).toBeInTheDocument();
+  });
+
+  async function openForm(routes: Parameters<typeof stubApi>[0]) {
+    const fetchMock = stubApi({ ...signedIn, [organizationsUrl()]: pageOf([]), ...routes });
+    const rendered = renderRoute('/');
+    await rendered.user.click(await screen.findByRole('button', { name: 'New Organization' }));
+    return { fetchMock, ...rendered };
+  }
+
+  it('creates the Organization and opens it', async () => {
+    const { fetchMock, user } = await openForm({
+      'POST /api/v1/organizations': Response.json(acme(), { status: 201 }),
+      [`GET /api/v1/organizations/${ACME}`]: Response.json(acme()),
+      [workspacesUrl()]: pageOf([workspaceDto()]),
+    });
+
+    await user.type(screen.getByLabelText('Name'), 'Acme');
+    await user.click(screen.getByRole('button', { name: 'Create Organization' }));
+
+    expect(await screen.findByRole('heading', { name: 'Acme', level: 1 })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Default' })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/organizations',
+      expect.objectContaining({ body: JSON.stringify({ name: 'Acme' }) }),
+    );
+  });
+
+  it('shows an invalid name on the field', async () => {
+    const { user } = await openForm({
+      'POST /api/v1/organizations': problem(422, 'validation-error', 'Validation failed', {
+        errors: [{ field: 'name', code: 'invalid', message: 'name must not be blank' }],
+      }),
+    });
+
+    await user.type(screen.getByLabelText('Name'), ' ');
+    await user.click(screen.getByRole('button', { name: 'Create Organization' }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Name')).toHaveAccessibleDescription('name must not be blank');
+    });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['a refused request', problem(403, 'forbidden', 'Not allowed')],
+    ['an unreachable server', undefined],
+  ])('reports %s above the form', async (_case, reply) => {
+    const { user } = await openForm(reply ? { 'POST /api/v1/organizations': reply } : {});
+
+    await user.type(screen.getByLabelText('Name'), 'Acme');
+    await user.click(screen.getByRole('button', { name: 'Create Organization' }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
+  it('closes the form on cancel', async () => {
+    const { user } = await openForm({});
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(screen.queryByRole('form', { name: 'New Organization' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'New Organization' })).toBeInTheDocument();
+  });
+});
+
 describe('Organization page', () => {
   const organizationRoutes = (role = 'owner', workspaces = [workspaceDto()]) => ({
     ...signedIn,

@@ -42,7 +42,7 @@ export function CreateWorkspaceForm({ organizationId, onClose }: CreateWorkspace
   }
 
   return (
-    <form className="workspace-form" aria-label="New Workspace" onSubmit={handleSubmit}>
+    <form className="list-form" aria-label="New Workspace" onSubmit={handleSubmit}>
       {create.isError && !nameError && <Alert tone="danger">{errorMessage(create.error)}</Alert>}
       <TextField
         label="Name"
@@ -76,7 +76,7 @@ export function CreateWorkspaceForm({ organizationId, onClose }: CreateWorkspace
         </div>
         <span className="field__help">{visibilityHelp[visibility]}</span>
       </div>
-      <div className="workspace-form__actions">
+      <div className="list-form__actions">
         <Button type="submit" busy={create.isPending}>
           Create Workspace
         </Button>
