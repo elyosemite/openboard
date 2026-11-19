@@ -30,6 +30,8 @@ tags:
     description: The signed-in User.
   - name: organizations
     description: Organizations, the tenants of the Instance (ADR 0003).
+  - name: workspaces
+    description: Workspaces, the divisions inside one Organization.
 paths:
   /healthz:
     get:
@@ -370,6 +372,155 @@ paths:
                 instance: /api/v1/organizations/0b5e3c1a-9f2d-4e6b-8a7c-1d2e3f4a5b6c
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
+  /api/v1/workspaces:
+    get:
+      tags: [workspaces]
+      operationId: listWorkspaces
+      summary: List the Workspaces of an Organization
+      description: |
+        Lists the Workspaces the signed-in User can enter in one Organization,
+        ordered by name ignoring case. Administrators and Organization Owners
+        see all of them. Other Users see Open Workspaces and those they hold a
+        Workspace Membership in.
+      parameters:
+        - name: organization_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: One page of Workspaces.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Workspace"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/PasswordChangeRequired"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "422":
+          description: |
+            `page` or `page_size` is out of range, or `organization_id` is not
+            a UUID (`invalid`) or names no Organization the User can see
+            (`not_found`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    post:
+      tags: [workspaces]
+      operationId: createWorkspace
+      summary: Create a Workspace
+      description: |
+        Creates a Workspace in an Organization. Only Organization Owners and
+        Administrators can create Workspaces. A creator who holds an
+        Organization Membership receives a Workspace Membership as Workspace
+        Owner.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkspaceRequest"
+      responses:
+        "201":
+          description: Workspace created.
+          headers:
+            Location:
+              description: The created Workspace.
+              schema:
+                type: string
+              example: /api/v1/workspaces/7c1d2e3f-4a5b-4c6d-8e7f-0a1b2c3d4e5f
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          description: |
+            The signed-in User does not manage the Organization (`forbidden`),
+            has a pending Temporary Password (`password-change-required`), or
+            the request is cross-origin (`cross-origin-request`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "409":
+          description: The Organization already has a Workspace with this name, ignoring case.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+              example:
+                type: https://openboard.dev/problems/workspace-name-taken
+                title: Workspace name already in use
+                status: 409
+                instance: /api/v1/workspaces
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          description: |
+            The name is blank or too long (`name`/`invalid`), the visibility is
+            unknown (`visibility`/`invalid`), or `organization_id` is not a
+            UUID (`invalid`) or names no Organization the User can see
+            (`not_found`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api/v1/workspaces/{workspace_id}:
+    get:
+      tags: [workspaces]
+      operationId: getWorkspace
+      summary: Get a Workspace
+      description: |
+        Returns a Workspace the signed-in User can enter. Workspaces that do
+        not exist and those the User cannot enter both answer 404.
+      parameters:
+        - name: workspace_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The Workspace.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/PasswordChangeRequired"
+        "404":
+          description: No such Workspace, or the User cannot enter it.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
 components:
   parameters:
     Page:
@@ -412,7 +563,7 @@ components:
           description: The User who becomes the first Organization Owner. Defaults to the creator.
     Organization:
       type: object
-      required: [id, name, created_at]
+      required: [id, name, created_at, current_user_role]
       properties:
         id:
           type: string
@@ -421,6 +572,49 @@ components:
           type: string
           example: Acme
         created_at:
+          type: string
+          format: date-time
+        current_user_role:
+          type: string
+          enum: [owner, contributor]
+          description: The role the signed-in User acts with. Administrators act as `owner` (ADR 0009).
+    CreateWorkspaceRequest:
+      type: object
+      required: [organization_id, name]
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Trimmed; must not be blank and must be unique in the Organization, ignoring case.
+          example: Legal
+        visibility:
+          type: string
+          enum: [open, restricted]
+          default: restricted
+    Workspace:
+      type: object
+      required: [id, organization_id, name, visibility, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Legal
+        visibility:
+          type: string
+          enum: [open, restricted]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
           type: string
           format: date-time
     SignInRequest:

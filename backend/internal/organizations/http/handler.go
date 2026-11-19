@@ -96,20 +96,24 @@ func (h *Handler) create(w http.ResponseWriter, r *http.Request) error {
 }
 
 type organizationResponse struct {
-	ID        domain.OrganizationID `json:"id"`
-	Name      string                `json:"name"`
-	CreatedAt time.Time             `json:"created_at"`
+	ID              domain.OrganizationID `json:"id"`
+	Name            string                `json:"name"`
+	CreatedAt       time.Time             `json:"created_at"`
+	CurrentUserRole domain.Role           `json:"current_user_role"`
 }
 
 func toOrganizationResponse(org domain.Organization) organizationResponse {
-	return organizationResponse{ID: org.ID, Name: org.Name, CreatedAt: org.CreatedAt}
+	return organizationResponse{ID: org.ID, Name: org.Name, CreatedAt: org.CreatedAt, CurrentUserRole: org.ViewerRole}
+}
+
+// fieldRule ties a domain validation error to the request field it concerns.
+type fieldRule struct {
+	err   error
+	field httpx.FieldError
 }
 
 // fieldErrors maps each domain validation error to the request field it concerns.
-var fieldErrors = []struct {
-	err   error
-	field httpx.FieldError
-}{
+var fieldErrors = []fieldRule{
 	{domain.ErrInvalidName, httpx.FieldError{Field: "name", Code: "invalid", Message: domain.ErrInvalidName.Error()}},
 	{domain.ErrInvalidUserID, httpx.FieldError{Field: "owner_user_id", Code: "invalid", Message: domain.ErrInvalidUserID.Error()}},
 	{domain.ErrOwnerNotFound, httpx.FieldError{Field: "owner_user_id", Code: "not_found", Message: domain.ErrOwnerNotFound.Error()}},
@@ -124,8 +128,14 @@ func mapError(err error) error {
 	if errors.Is(err, domain.ErrNotFound) {
 		return httpx.ErrNotFound()
 	}
+	return validationOr(err, fieldErrors)
+}
+
+// validationOr reports the fields err concerns as a validation problem, or
+// returns err unchanged when it concerns none.
+func validationOr(err error, rules []fieldRule) error {
 	var fields []httpx.FieldError
-	for _, fe := range fieldErrors {
+	for _, fe := range rules {
 		if errors.Is(err, fe.err) {
 			fields = append(fields, fe.field)
 		}

@@ -1,7 +1,11 @@
 import type { ButtonHTMLAttributes } from 'react';
-import './Button.css';
 
 export type ButtonVariant = 'primary' | 'secondary';
+
+const variantClasses: Record<ButtonVariant, string> = {
+  primary: 'btn btn--primary',
+  secondary: 'btn btn--outline',
+};
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -21,7 +25,7 @@ export function Button({
     <button
       {...rest}
       type={type}
-      className={`ob-button ob-button--${variant}`}
+      className={variantClasses[variant]}
       disabled={disabled === true || busy}
       aria-busy={busy || undefined}
     >

@@ -21,6 +21,13 @@ func setupOrganizations(logger *slog.Logger, pool *pgxpool.Pool, identity *ident
 	return organizationshttp.NewHandler(svc, auth, logger)
 }
 
+// setupWorkspaces wires the Workspace endpoints of the Organization module.
+func setupWorkspaces(logger *slog.Logger, pool *pgxpool.Pool, identity *identityhttp.Handler) *organizationshttp.WorkspaceHandler {
+	svc := application.NewWorkspaceService(postgres.NewWorkspaces(pool))
+	auth := organizationshttp.Auth{Authenticated: identity.Authenticated, Actor: actorOf}
+	return organizationshttp.NewWorkspaceHandler(svc, auth, logger)
+}
+
 // actorOf translates the identity Principal into the Organization module's Actor.
 func actorOf(ctx context.Context) domain.Actor {
 	p, _ := identityhttp.PrincipalFrom(ctx)

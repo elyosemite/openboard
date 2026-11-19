@@ -36,7 +36,7 @@ func (f *fakeService) GetOrganization(_ context.Context, actor domain.Actor, raw
 	if f.err != nil {
 		return domain.Organization{}, f.err
 	}
-	return domain.Organization{ID: domain.OrganizationID(rawID), Name: "Acme", CreatedAt: created}, nil
+	return domain.Organization{ID: domain.OrganizationID(rawID), Name: "Acme", CreatedAt: created, ViewerRole: domain.RoleOwner}, nil
 }
 
 func (f *fakeService) ListOrganizations(_ context.Context, actor domain.Actor, page application.PageRequest) ([]domain.Organization, int, error) {
@@ -49,7 +49,7 @@ func (f *fakeService) CreateOrganization(_ context.Context, actor domain.Actor, 
 	if f.err != nil {
 		return domain.Organization{}, f.err
 	}
-	return domain.Organization{ID: "o1", Name: in.Name, CreatedAt: created}, nil
+	return domain.Organization{ID: "o1", Name: in.Name, CreatedAt: created, ViewerRole: domain.RoleOwner}, nil
 }
 
 // fakeAuth lets requests through as administrator unless signedOut is set.
@@ -102,7 +102,7 @@ func TestCreateOrganization(t *testing.T) {
 	if svc.actor != administrator || svc.in != (application.CreateOrganizationInput{Name: "Acme", OwnerUserID: "u2"}) {
 		t.Errorf("service called with %+v, %+v", svc.actor, svc.in)
 	}
-	want := `{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z"}`
+	want := `{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z","current_user_role":"owner"}`
 	if got := strings.TrimSpace(rec.Body.String()); got != want {
 		t.Errorf("body %s, want %s", got, want)
 	}
@@ -154,7 +154,7 @@ func TestCreateOrganizationErrors(t *testing.T) {
 }
 
 func TestListOrganizations(t *testing.T) {
-	svc := &fakeService{orgs: []domain.Organization{{ID: "o1", Name: "Acme", CreatedAt: created}}, total: 21}
+	svc := &fakeService{orgs: []domain.Organization{{ID: "o1", Name: "Acme", CreatedAt: created, ViewerRole: domain.RoleContributor}}, total: 21}
 	rec := serve(svc, fakeAuth(false), http.MethodGet, "/api/v1/organizations?page=2&page_size=10", "")
 
 	if rec.Code != http.StatusOK {
@@ -163,7 +163,7 @@ func TestListOrganizations(t *testing.T) {
 	if svc.actor != administrator || svc.page != (application.PageRequest{Limit: 10, Offset: 10}) {
 		t.Errorf("service called with %+v, %+v", svc.actor, svc.page)
 	}
-	want := `{"items":[{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z"}],"page":2,"page_size":10,"total_items":21,"total_pages":3}`
+	want := `{"items":[{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z","current_user_role":"contributor"}],"page":2,"page_size":10,"total_items":21,"total_pages":3}`
 	if got := strings.TrimSpace(rec.Body.String()); got != want {
 		t.Errorf("body %s, want %s", got, want)
 	}
@@ -193,7 +193,7 @@ func TestGetOrganization(t *testing.T) {
 	if rec.Code != http.StatusOK || svc.id != "o1" || svc.actor != administrator {
 		t.Fatalf("status %d, id %q, actor %+v", rec.Code, svc.id, svc.actor)
 	}
-	if want := `{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z"}`; strings.TrimSpace(rec.Body.String()) != want {
+	if want := `{"id":"o1","name":"Acme","created_at":"2026-11-17T12:00:00Z","current_user_role":"owner"}`; strings.TrimSpace(rec.Body.String()) != want {
 		t.Errorf("body %s", rec.Body.String())
 	}
 

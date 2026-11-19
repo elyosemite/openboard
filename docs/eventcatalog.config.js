@@ -17,9 +17,14 @@ export default {
     // Broken internal links fail CI; locally they only warn.
     onBrokenLinks: process.env.CI ? 'error' : 'warn',
     onBrokenAnchors: process.env.CI ? 'error' : 'warn',
-    // Absolute GitHub URLs (editUrl, homepageLink, EventCatalog's own license link)
-    // are reported by their path as if they were internal pages.
-    ignore: ['/elyosemite/openboard', '/elyosemite/openboard/**', '/event-catalog/eventcatalog/**'],
+    // Absolute GitHub URLs (editUrl, homepageLink, EventCatalog's own license link,
+    // the design system in ADR 0011) are reported by their path as if they were internal pages.
+    ignore: [
+      '/elyosemite/openboard',
+      '/elyosemite/openboard/**',
+      '/elyosemite/ocaml-design-system',
+      '/event-catalog/eventcatalog/**',
+    ],
   },
   trailingSlash: false,
   base: '/',
