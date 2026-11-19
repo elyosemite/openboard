@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  createOrganization,
   createWorkspace,
   getOrganization,
   getWorkspace,
@@ -13,6 +14,14 @@ export function useOrganizations(page: number) {
   return useQuery({
     queryKey: ['organizations', page],
     queryFn: ({ signal }) => listOrganizations(page, signal),
+  });
+}
+
+export function useCreateOrganization() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createOrganization,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['organizations'] }),
   });
 }
 

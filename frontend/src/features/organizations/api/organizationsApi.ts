@@ -85,6 +85,15 @@ export async function getOrganization(id: string, signal?: AbortSignal): Promise
   return toOrganization(await apiRequest<OrganizationDto>(path, { signal }));
 }
 
+/** Creates an Organization whose first Organization Owner is the signed-in User. */
+export async function createOrganization(name: string): Promise<Organization> {
+  const dto = await apiRequest<OrganizationDto>('/api/v1/organizations', {
+    method: 'POST',
+    body: { name },
+  });
+  return toOrganization(dto);
+}
+
 export async function listWorkspaces(
   organizationId: string,
   page: number,
