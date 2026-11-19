@@ -43,14 +43,18 @@
   gap: var(--space-100);
 }
 
-.list-form {
+.form-stack {
   display: grid;
   gap: var(--space-200);
+}
+
+/* A form shown inside a list panel, above its items. */
+.list-form {
   padding: var(--space-200);
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
-.list-form__actions {
+.form-actions {
   display: flex;
   gap: var(--space-100);
 }

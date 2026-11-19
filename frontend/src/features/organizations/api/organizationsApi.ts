@@ -4,6 +4,7 @@ export const PAGE_SIZE = 20;
 
 export type OrganizationRole = 'owner' | 'contributor';
 export type WorkspaceVisibility = 'open' | 'restricted';
+export type WorkspaceRole = 'owner' | 'contributor' | 'viewer';
 
 export interface Organization {
   id: string;
@@ -17,6 +18,13 @@ export interface Workspace {
   name: string;
   visibility: WorkspaceVisibility;
   createdAt: string;
+  currentUserRole: WorkspaceRole;
+}
+
+/** The fields to change in a Workspace; those left out keep their value. */
+export interface WorkspaceChange {
+  name?: string;
+  visibility?: WorkspaceVisibility;
 }
 
 export interface Page<T> {
@@ -49,6 +57,7 @@ interface WorkspaceDto {
   name: string;
   visibility: WorkspaceVisibility;
   created_at: string;
+  current_user_role: WorkspaceRole;
 }
 
 function toOrganization(dto: OrganizationDto): Organization {
@@ -62,6 +71,7 @@ function toWorkspace(dto: WorkspaceDto): Workspace {
     name: dto.name,
     visibility: dto.visibility,
     createdAt: dto.created_at,
+    currentUserRole: dto.current_user_role,
   };
 }
 
@@ -123,4 +133,9 @@ export async function createWorkspace(workspace: NewWorkspace): Promise<Workspac
     },
   });
   return toWorkspace(dto);
+}
+
+export async function updateWorkspace(id: string, change: WorkspaceChange): Promise<Workspace> {
+  const path = `/api/v1/workspaces/${encodeURIComponent(id)}`;
+  return toWorkspace(await apiRequest<WorkspaceDto>(path, { method: 'PATCH', body: change }));
 }
